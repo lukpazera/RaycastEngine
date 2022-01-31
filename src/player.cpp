@@ -22,14 +22,17 @@ ofVec2f Player::getDirection() const
     return _playerDirection;
 }
 
+/*
+ * Returns player look at angle.
+ * 0 angle is player looking down the map.
+ */
 float Player::getLookAtAngle() const
 {
     return _playerLookAtAngle;
 }
 
 void Player::move(float distance)
-{
-    
+{    
     ofVec2f newPosition = _playerPosition + (_playerDirection * distance);
     if (_map->isWall((int)newPosition.x, (int)newPosition.y))
     {
@@ -38,6 +41,10 @@ void Player::move(float distance)
     _playerPosition = newPosition;
 }
 
+/*
+ * Rotates player in place by a given angle in radians.
+ * Increasing angle rotates player counterclockwise.
+ */
 void Player::rotate(float angle)
 {
     _playerLookAtAngle += angle;
