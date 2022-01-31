@@ -58,7 +58,6 @@ bool Map::isWall(int x, int y)
  */
 void Map::draw()
 {
-	int screenWidth = ofGetWidth();
 	int screenHeight = ofGetHeight();
 
 	int blockSize = screenHeight / _mapHeight;
