@@ -7,6 +7,7 @@
 #include "player.hpp"
 #include "texture.hpp"
 
+
 class Renderer
 {
 public:
@@ -21,6 +22,8 @@ public:
     void increaseResolution();
     void decreaseResolution();
 
+	void setDebugDrawing(bool state);
+
 private:
     /* Calculates new render size based on resolution multiplier.
      */
@@ -31,6 +34,8 @@ private:
      */
     void _allocateRenderBuffer();
     
+	void _drawDebug();
+
     // Resolution of the rendered image in pixels.
     int _resX;
     int _resY;
@@ -52,5 +57,7 @@ private:
     ofImage _tex;
     ofImage _texMetal;
     Texture _tex1;
-    
+
+	bool _debugDrawing;
+	vector<ofVec2f> _debugRays;
 };

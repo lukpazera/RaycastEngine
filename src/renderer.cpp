@@ -6,6 +6,7 @@ Renderer::Renderer() :
 	_resX(320),
 	_resY(240),
     _resMultiplier(4),
+	_debugDrawing(false),
     _tex1("TexConcrete1024.png")
 {
     _fov = 3.14159 / 2.5f;
@@ -15,7 +16,14 @@ Renderer::Renderer() :
     _lightDirection.x = sinf(_lightAngle);
     _lightDirection.y = cosf(_lightAngle);
     
+	_debugRays.clear();
+
     _allocateRenderBuffer();
+}
+
+void Renderer::setDebugDrawing(bool state)
+{
+	_debugDrawing = state;
 }
 
 void Renderer::update()
@@ -37,6 +45,9 @@ void Renderer::update()
     
     float lightIntensity = (_player->getDirection().dot(_lightDirection) + 1.0f) / 2.0f;
     
+	// We'll store rays in vector for later drawing on screen.
+	if (_debugDrawing) { _debugRays.clear(); }
+
     for (int x = 0; x < columns; x++)
     {
 		// Progressing through angles needs to go in correct direction, rendering will be flipped
@@ -44,6 +55,7 @@ void Renderer::update()
 		// Starting angle needs to be increased by half a FOV and then we go down to draw
 		// in clockwise order.
         float rayAngle = (_player->getLookAtAngle() + (_fov / 2)) - (((float)x / (float)columns) * _fov);
+
         float distanceToSurface = 0;
         float sampleX = 0;
         bool surfaceHit = false;
@@ -117,6 +129,10 @@ void Renderer::update()
         
         // To calculate line length can't use the distance to surface directly.
         ofVec2f alongEye(eye * distanceToSurface);
+
+		// Store ray for debug drawing for later.
+		if (_debugDrawing) { _debugRays.push_back(alongEye); }
+
         float cameraDistance = _player->getDirection().dot(alongEye);
         //float medianDistance = ((distanceToSurface * 0.3f)  + (cameraDistance * 0.7f));
         float distancedifference = distanceToSurface - cameraDistance;
@@ -215,6 +231,7 @@ void Renderer::update()
 void Renderer::draw()
 {
     _buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
+	_drawDebug();
 }
 
 void Renderer::setMap(Map *map)
@@ -256,4 +273,18 @@ void Renderer::_allocateRenderBuffer()
     _calculateRenderSize();
     _buffer.clear();
     _buffer.allocate(_resX, _resY, OF_IMAGE_COLOR);
+}
+
+void Renderer::_drawDebug()
+{
+	if (!_debugDrawing) { return; }
+	
+	float cellSize = float(ofGetHeight() / _map->getHeight());
+	ofVec2f p1 = _player->getPosition() * cellSize;
+	for (auto it = std::begin(_debugRays); it != std::end(_debugRays); ++it)
+	{
+		ofVec2f p2 = ((*it * cellSize) + p1);
+		ofSetColor(255, 0, 64);
+		ofDrawLine(p1, p2);
+	}
 }
