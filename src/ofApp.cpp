@@ -42,11 +42,17 @@ void ofApp::draw()
         _slowestFrame = lastFrameTime;
     }
     
+	if (_debugDrawing)
+	{
+		_map.draw();
+	}
+
     int fpsval = (int)(1.0 / lastFrameTime);
     std::string fps = std::to_string(fpsval);
     ofDrawBitmapStringHighlight(fps, 40, 40);
     ofSetColor(40, 255, 40);
     ofDrawRectangle(20, 70, 4 * fpsval, 20);
+
 }
 
 //--------------------------------------------------------------
