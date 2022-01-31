@@ -16,7 +16,8 @@ public:
     int getHeight();
     char getCell(int x, int y);
     bool isWall(int x, int y);
-    
+	void draw();
+
 private:
     int _mapWidth;
     int _mapHeight;
