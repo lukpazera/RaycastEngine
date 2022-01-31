@@ -45,4 +45,5 @@ private:
     int _renderHeight;
     
     double _slowestFrame;
+	bool _debugDrawing;
 };

@@ -3,6 +3,7 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     _slowestFrame = 0;
+	_debugDrawing = false;
 
     _fov = 3.14159 / 2.5f;
     _maxTestingDepth = 16.0f;
@@ -76,6 +77,12 @@ void ofApp::keyPressed(int key){
     {
         _renderer.increaseResolution();
     }
+
+	// Toggle debug drawing
+	else if (key == '1')
+	{
+		_debugDrawing = !_debugDrawing;
+	}
 }
 
 //--------------------------------------------------------------
