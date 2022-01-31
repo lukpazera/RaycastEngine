@@ -43,11 +43,7 @@ int Map::getHeight()
 char Map::getCell(int x, int y)
 {
     int indexInMap = (y * _mapWidth) + x;
-    return _map.at(indexInMap);
-    //char wall = '#';
-    //char metalWall = '$';
-    //mapElement = _map.at(indexInMap);
-    
+    return _map.at(indexInMap);    
 }
 
 bool Map::isWall(int x, int y)

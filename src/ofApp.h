@@ -30,13 +30,10 @@ private:
     Player _player;
     Map _map;
     Renderer _renderer;
-    //ofVec2f _playerPosition;
-    //float _playerLookAtAngle;
-    //ofVec2f _playerDirection;
+
     float _fov;
     float _maxTestingDepth;
     
-
     float _lightAngle;
     ofVec2f _lightDirection;
     
