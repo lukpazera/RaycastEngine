@@ -17,6 +17,8 @@ public:
     void move(float distance);
     void rotate(float angle);
     
+	void draw();
+
     void setMap(Map* map);
     
 private:

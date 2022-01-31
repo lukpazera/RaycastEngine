@@ -45,6 +45,7 @@ void ofApp::draw()
 	if (_debugDrawing)
 	{
 		_map.draw();
+		_player.draw();
 	}
 
     int fpsval = (int)(1.0 / lastFrameTime);
