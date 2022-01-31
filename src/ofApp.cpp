@@ -60,11 +60,13 @@ void ofApp::draw()
 void ofApp::keyPressed(int key){
     if (key == 'd')
     {
-        _player.rotate(0.2f); // * ofGetLastFrameTime());
+		// Decrease angle to rotate clockwise
+        _player.rotate(-0.2f); // * ofGetLastFrameTime());
     }
     else if (key == 'a')
     {
-        _player.rotate(-0.2f); // * ofGetLastFrameTime());
+		// Increase angle to rotate counterclockwise
+        _player.rotate(0.2f); // * ofGetLastFrameTime());
     }
     else if (key == 'w')
     {

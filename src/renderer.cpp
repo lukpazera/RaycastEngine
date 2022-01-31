@@ -39,7 +39,11 @@ void Renderer::update()
     
     for (int x = 0; x < columns; x++)
     {
-        float rayAngle = (_player->getLookAtAngle() - (_fov / 2)) + (((float)x / (float)columns) * _fov);
+		// Progressing through angles needs to go in correct direction, rendering will be flipped
+		// compared to the map otherwise.
+		// Starting angle needs to be increased by half a FOV and then we go down to draw
+		// in clockwise order.
+        float rayAngle = (_player->getLookAtAngle() + (_fov / 2)) - (((float)x / (float)columns) * _fov);
         float distanceToSurface = 0;
         float sampleX = 0;
         bool surfaceHit = false;
