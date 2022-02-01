@@ -9,7 +9,8 @@ Renderer::Renderer() :
 	_debugDrawing(false),
     _tex1("TexConcrete1024.png")
 {
-    _fov = 3.14159 / 2.5f;
+    _fov = 3.14159 / 2.0f;
+	_heightSquashFactor = 1.5f;
     _maxTestingDepth = 16.0f;
     
     _lightAngle = 3.14159 / 3.0;
@@ -17,6 +18,7 @@ Renderer::Renderer() :
     _lightDirection.y = cosf(_lightAngle);
     
 	_debugRays.clear();
+	_debugFOVPoints.clear();
 
     _allocateRenderBuffer();
 }
@@ -46,22 +48,43 @@ void Renderer::update()
     float lightIntensity = (_player->getDirection().dot(_lightDirection) + 1.0f) / 2.0f;
     
 	// We'll store rays in vector for later drawing on screen.
-	if (_debugDrawing) { _debugRays.clear(); }
+	if (_debugDrawing)
+	{
+		_debugRays.clear();
+		_debugFOVPoints.clear();
+	}
+
+	// Progressing through FOV needs to go in correct direction, rendering will be flipped
+	// compared to the map otherwise.
+	// What we do here is we pick start and end angle and create start and end eye vectors
+	// out of these.
+	// We are going to cast rays between these 2 eye start and end vectors.
+	float startRayAngle = (_player->getLookAtAngle() + (_fov / 2));
+	float endRayAngle = (_player->getLookAtAngle() - (_fov / 2));
+	ofVec2f eyeStart(sinf(startRayAngle), cosf(startRayAngle));
+	ofVec2f eyeEnd(sinf(endRayAngle), cosf(endRayAngle));
+
+	// The idea here is that we do not go by angle step across the FOV
+	// as this creates distortion.
+	// What we need to do is to go in equal distance steps along the vector that goes
+	// from eyeStart to eyeEnd.
+	// Here we only initialize the length of that step
+	// and we'll use it later in the loop to calculate eye vectors.
+	ofVec2f visionLine = eyeEnd - eyeStart;
+	ofVec2f visionLineNorm = visionLine.normalized();
+	float visionLineLength = visionLine.length();
+	float visionLineStep = visionLineLength / float(columns);
 
     for (int x = 0; x < columns; x++)
     {
-		// Progressing through angles needs to go in correct direction, rendering will be flipped
-		// compared to the map otherwise.
-		// Starting angle needs to be increased by half a FOV and then we go down to draw
-		// in clockwise order.
-        float rayAngle = (_player->getLookAtAngle() + (_fov / 2)) - (((float)x / (float)columns) * _fov);
-
         float distanceToSurface = 0;
         float sampleX = 0;
         bool surfaceHit = false;
-        
-        ofVec2f eye(sinf(rayAngle), cosf(rayAngle));
-        ofVec2f normal(0, 0);
+
+		ofVec2f eye = eyeStart + (visionLineNorm * float(x) * visionLineStep);
+		if (_debugDrawing) { _debugFOVPoints.push_back(eye); }
+		eye.normalize();
+		ofVec2f normal(0, 0);
         
         char wall = '#';
         char metalWall = '$';
@@ -134,13 +157,13 @@ void Renderer::update()
 		if (_debugDrawing) { _debugRays.push_back(alongEye); }
 
         float cameraDistance = _player->getDirection().dot(alongEye);
-        //float medianDistance = ((distanceToSurface * 0.3f)  + (cameraDistance * 0.7f));
-        float distancedifference = distanceToSurface - cameraDistance;
-        float medianDistance = cameraDistance + (distancedifference / 4.0f);
+		float medianDistance = cameraDistance;
+
+        int height = _resY;
         
-        int height = _resY; // / 2;
-        
-        int minY = (float)(height / 2) - height / (medianDistance * 1.4f); // 1.4 if increasing depth impression
+		// Height squash factor is used to compress vertical lines so walls look square rather than
+		// being alongated on Y
+		int minY = (float)(height / 2) - height / (medianDistance * _heightSquashFactor); 
         
         int maxY = height - minY;
         float distanceShade = 255.0 - (medianDistance * 16.0f);
@@ -286,5 +309,12 @@ void Renderer::_drawDebug()
 		ofVec2f p2 = ((*it * cellSize) + p1);
 		ofSetColor(255, 0, 64);
 		ofDrawLine(p1, p2);
+	}
+
+	for (int i = 0; i < _debugFOVPoints.size(); i+=16)
+	{
+		ofVec2f p = p1 + (_debugFOVPoints.at(i) * cellSize * 5);
+		ofSetColor(255, 128, 255);
+		ofDrawCircle(p, 1);
 	}
 }

@@ -50,6 +50,7 @@ private:
     Player* _player;
 
     float _fov;
+	float _heightSquashFactor;
     float _maxTestingDepth;
     float _lightAngle;
     ofVec2f _lightDirection;
@@ -60,4 +61,5 @@ private:
 
 	bool _debugDrawing;
 	vector<ofVec2f> _debugRays;
+	vector<ofVec2f> _debugFOVPoints;
 };
