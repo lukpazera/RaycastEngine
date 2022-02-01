@@ -9,17 +9,10 @@ void ofApp::setup(){
     
     _renderer.setMap(&_map);
     _renderer.setPlayer(&_player);
-
-    _lightAngle = 3.14159 / 3.0;
-    _lightDirection.x = sinf(_lightAngle);
-    _lightDirection.y = cosf(_lightAngle);
     
     _tex.load("TexConcrete1024.png");
     _texMetal.load("TexMetal1024.png");
     _bg.load("Background.png");
-    
-    _renderWidth = ofGetWidth();
-    _renderHeight = ofGetHeight();
 }
 
 //--------------------------------------------------------------

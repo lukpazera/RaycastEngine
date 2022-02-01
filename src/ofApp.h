@@ -31,15 +31,9 @@ private:
     Map _map;
     Renderer _renderer;
     
-    float _lightAngle;
-    ofVec2f _lightDirection;
-    
     ofImage _tex;
     ofImage _texMetal;
     ofImage _bg;
-    
-    int _renderWidth;
-    int _renderHeight;
     
     double _slowestFrame;
 	bool _debugDrawing;
