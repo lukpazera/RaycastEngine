@@ -30,9 +30,6 @@ private:
     Player _player;
     Map _map;
     Renderer _renderer;
-
-    float _fov;
-    float _maxTestingDepth;
     
     float _lightAngle;
     ofVec2f _lightDirection;

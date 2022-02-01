@@ -4,9 +4,6 @@
 void ofApp::setup(){
     _slowestFrame = 0;
 	_debugDrawing = false;
-
-    _fov = 3.14159 / 2.5f;
-    _maxTestingDepth = 16.0f;
     
     _player.setMap(&_map);
     
@@ -48,12 +45,14 @@ void ofApp::draw()
 		_player.draw();
 	}
 
-    int fpsval = (int)(1.0 / lastFrameTime);
-    std::string fps = std::to_string(fpsval);
-    ofDrawBitmapStringHighlight(fps, 40, 40);
-    ofSetColor(40, 255, 40);
-    ofDrawRectangle(20, 70, 4 * fpsval, 20);
-
+	if (_debugDrawing)
+	{
+		int fpsval = (int)(1.0 / lastFrameTime);
+		std::string fps = std::to_string(fpsval);
+		ofDrawBitmapStringHighlight(fps, 40, 40);
+		ofSetColor(40, 255, 40);
+		ofDrawRectangle(20, 70, 4 * fpsval, 20);
+	}
 }
 
 //--------------------------------------------------------------
