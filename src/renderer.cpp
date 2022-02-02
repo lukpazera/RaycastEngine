@@ -60,6 +60,74 @@ void Renderer::draw()
 		_debugFOVPoints.clear();
 	}
 
+	// DDA Algo
+	ofVec2f rayStart = _player->getPosition();
+	ofVec2f rayDir = _player->getDirection();
+	float rayXUnitStepSize = sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x));
+	float rayYUnitStepSize = sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y));
+	ofVec2f rayUnitStepSize = ofVec2f(rayXUnitStepSize, rayYUnitStepSize); // how much we move along the ray in x and y direction.
+	int rayMapX = int(rayStart.x);
+	int rayMapY = int(rayStart.y);
+	ofVec2f rayLengthByAxis = ofVec2f();
+	int cellStepX = 0;
+	int cellStepY = 0;
+
+	// Starting conditions
+	if (rayDir.x < 0)
+	{
+		cellStepX = -1;
+		rayLengthByAxis.x = fmod(rayStart.x, 1.0) * rayUnitStepSize.x;
+	}
+	else
+	{
+		cellStepX = 1;
+		rayLengthByAxis.x = (1.0 - fmod(rayStart.x, 1.0)) * rayUnitStepSize.x;
+	}
+	
+	if (rayDir.y < 0)
+	{
+		cellStepY = -1;
+		rayLengthByAxis.y = fmod(rayStart.y, 1.0) * rayUnitStepSize.y;
+	}
+	else
+	{
+		cellStepY = 1;
+		rayLengthByAxis.y = (1.0 - fmod(rayStart.y, 1.0)) * rayUnitStepSize.y;
+	}
+
+	bool wallFound = false;
+	float castDistance = 0;
+	while (!wallFound && castDistance < _maxTestingDepth)
+	{
+		if (rayLengthByAxis.x < rayLengthByAxis.y)
+		// travel in x distance
+		{
+			rayMapX += cellStepX;
+			castDistance = rayLengthByAxis.x;
+			rayLengthByAxis.x += rayUnitStepSize.x;
+		}
+		else
+		// travel in y distance
+		{
+			rayMapY += cellStepY;
+			castDistance = rayLengthByAxis.y;
+			rayLengthByAxis.y += rayUnitStepSize.y;
+		}
+
+		char mapElement = _map->getCell(rayMapX, rayMapY);
+		if (mapElement == '#' || mapElement == '$')
+		{
+			wallFound = true;
+		}
+	}
+
+	ofVec2f intersection = ofVec2f();
+	if (wallFound)
+	{
+		intersection = rayStart + rayDir * castDistance;
+	}
+
+
 	// Progressing through FOV needs to go in correct direction, rendering will be flipped
 	// compared to the map otherwise.
 	// What we do here is we pick start and end angle and create start and end eye vectors
@@ -273,6 +341,18 @@ void Renderer::draw()
     _buffer.update();
 	_buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
 	_drawDebug();
+
+	if (wallFound)
+	{
+		ofVec2f testVec = ofVec2f(rayStart.x, rayStart.y);
+		testVec += rayDir * rayLengthByAxis.x;
+
+		float cellSize = float(ofGetHeight() / _map->getHeight());
+		ofVec2f p1 = rayStart * cellSize;
+		ofVec2f p2 = intersection * cellSize;
+		ofSetColor(0, 200, 255);
+		ofDrawLine(p1, p2);
+	}
 }
 
 void Renderer::setMap(Map *map)
