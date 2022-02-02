@@ -234,17 +234,25 @@ void Renderer::draw()
             //ofColor depthShaded = pixelColor.lerp(depthColor, fogAmount);
             pixelColor.lerp(depthColor, fogAmount);
             pixelColor.a = 255;
-            
+      
+
+			int index = (y * _resX + x) * 3;
+			memcpy(&_buffer.getPixels()[index], &pixelColor, 3);
+
             //ofSetColor(pixelColor);
             //ofDrawRectangle(x * 2, y * 2, 2, 2);
             //_buffer.setColor(x, y, pixelColor);
 			//int index = (y * _resX + x) * 3;
+			
 			//_buffer.getPixels()[index] = pixelColor.r;
+			
+			// This is drawing pixel
 			//_buffer.getPixels()[index+1] = pixelColor.g;
+			
+			
 			//_buffer.getPixels()[index+2] = pixelColor.b;
 
-			int index = (y * _resX + x) * 3;
-			_buffer.getPixels().setColor(x, y, pixelColor);
+			//_buffer.getPixels().setColor(x, y, pixelColor);
 
             int refY = wallHeight - (y - minY) + maxY - 1;
             
