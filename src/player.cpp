@@ -48,6 +48,8 @@ void Player::move(float distance)
 void Player::rotate(float angle)
 {
     _playerLookAtAngle += angle;
+	if (_playerLookAtAngle > TWO_PI) { _playerLookAtAngle -= TWO_PI; }
+	else if (_playerLookAtAngle < 0) { _playerLookAtAngle += TWO_PI; }
     _playerDirection.x = sinf(_playerLookAtAngle);
     _playerDirection.y = cosf(_playerLookAtAngle);
 }
