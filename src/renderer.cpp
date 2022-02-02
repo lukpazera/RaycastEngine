@@ -30,23 +30,29 @@ void Renderer::setDebugDrawing(bool state)
 
 void Renderer::update()
 {
-    ofColor groundClose(91, 91, 91);
-    ofColor groundFar(0, 0, 0);
-    ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
-    
-    // Background
-    ofColor sky(67, 74, 83);
-    ofSetColor(sky);
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
+
+}
+
+void Renderer::draw()
+{
+	// Background
+	ofColor sky(67, 94, 163);
+	ofSetColor(sky);
+	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
+
+    //ofColor groundClose(91, 91, 91);
+    //ofColor groundFar(0, 0, 0);
+    //ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
+   
     
     int columns = _resX;
     float centerX = _resX / 2;
     float centerY = _resY / 2;
 
     _buffer.setColor(sky);
-    
+
     float lightIntensity = (_player->getDirection().dot(_lightDirection) + 1.0f) / 2.0f;
-    
+
 	// We'll store rays in vector for later drawing on screen.
 	if (_debugDrawing)
 	{
@@ -220,19 +226,26 @@ void Renderer::update()
             //pixelColor *= (1.0f - (medianDistance / 16.0f * 0.95f)); // depth shading
             float fogAmount = medianDistance / 16.0f * 0.9f;
             
-            pixelColor *= (lightIntensity);// * 0.5f + 0.5f) ;
-            pixelColor *= brightnessBoost;
+            //pixelColor *= (lightIntensity);// * 0.5f + 0.5f) ;
+            //pixelColor *= brightnessBoost;
             
             ofColor depthColor(20, 20, 20);
             depthColor *= 0.25f;
-            ofColor depthShaded = pixelColor.lerp(depthColor, fogAmount);
-            pixelColor = depthShaded;
+            //ofColor depthShaded = pixelColor.lerp(depthColor, fogAmount);
+            pixelColor.lerp(depthColor, fogAmount);
             pixelColor.a = 255;
             
             //ofSetColor(pixelColor);
             //ofDrawRectangle(x * 2, y * 2, 2, 2);
-            _buffer.setColor(x, y, pixelColor);
-            
+            //_buffer.setColor(x, y, pixelColor);
+			//int index = (y * _resX + x) * 3;
+			//_buffer.getPixels()[index] = pixelColor.r;
+			//_buffer.getPixels()[index+1] = pixelColor.g;
+			//_buffer.getPixels()[index+2] = pixelColor.b;
+
+			int index = (y * _resX + x) * 3;
+			_buffer.getPixels().setColor(x, y, pixelColor);
+
             int refY = wallHeight - (y - minY) + maxY - 1;
             
             if (refY < _resY)
@@ -248,12 +261,9 @@ void Renderer::update()
             //ofDrawLine(x*2, y*2, x*2+1, y*2);
         }
     }
+	//_buffer.setFromPixels(_pixels);
     _buffer.update();
-}
-
-void Renderer::draw()
-{
-    _buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
+	_buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
 	_drawDebug();
 }
 
