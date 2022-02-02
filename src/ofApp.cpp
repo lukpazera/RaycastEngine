@@ -38,11 +38,12 @@ void ofApp::draw()
 		_player.draw();
 	}
 
+	int fpsval = (int)(1.0 / lastFrameTime);
+	std::string fps = std::to_string(fpsval);
+	ofDrawBitmapStringHighlight(fps, 40, 40);
+
 	if (_debugDrawing)
 	{
-		int fpsval = (int)(1.0 / lastFrameTime);
-		std::string fps = std::to_string(fpsval);
-		ofDrawBitmapStringHighlight(fps, 40, 40);
 		ofSetColor(40, 255, 40);
 		ofDrawRectangle(20, 70, 4 * fpsval, 20);
 	}
