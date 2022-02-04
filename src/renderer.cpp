@@ -60,6 +60,7 @@ void Renderer::draw()
 		_debugFOVPoints.clear();
 	}
 
+	// --- Setting up FOV processing
 	// Progressing through FOV needs to go in correct direction, rendering will be flipped
 	// compared to the map otherwise.
 	// What we do here is we pick start and end angle and create start and end eye vectors
@@ -83,78 +84,93 @@ void Renderer::draw()
 
     for (int x = 0; x < columns; x++)
     {
-        float distanceToSurface = 0;
-        float sampleX = 0;
-        bool surfaceHit = false;
-
 		ofVec2f eye = eyeStart + (visionLineNorm * float(x) * visionLineStep);
 		if (_debugDrawing) { _debugFOVPoints.push_back(eye); }
 		eye.normalize();
 		ofVec2f normal(0, 0);
-        
-        char wall = '#';
-        char metalWall = '$';
-        char mapElement;
-        
-        while(!surfaceHit && distanceToSurface < _maxTestingDepth)
-        {
-            distanceToSurface += 0.01f;
-            
-            // Test a cell in a map.
-            int testX = (int)(_player->getPosition().x + (eye.x * distanceToSurface));
-            int testY = (int)(_player->getPosition().y + (eye.y * distanceToSurface));
-            
-            // Test if we're beyond map bounds
-            if (testX < 0 || testX > _map->getWidth() || testY < 0 || testY > _map->getHeight())
-            {
-                surfaceHit = true;
-                distanceToSurface = _maxTestingDepth;
-            }
-            else
-            {
-                mapElement = _map->getCell(testX, testY);
-                if (wall == mapElement || metalWall == mapElement)
-                {
-                    surfaceHit = true;
-                    
-                    // find mid point of a cell
-                    float blockMidX = (float)testX + 0.5f;
-                    float blockMidY = (float)testY + 0.5f;
-                    
-                    // this can really be a vector
-                    ofVec2f wallCollisionPoint = _player->getPosition() + (eye * distanceToSurface);
-                    
-                    //
-                    float testAngle = atan2f(wallCollisionPoint.y - blockMidY, wallCollisionPoint.x - blockMidX);
-                    if(testAngle >= -3.14159f * 0.25f && testAngle < 3.14159f * 0.25f)
-                    {
-                        sampleX = wallCollisionPoint.y - (float)testY;
-                        normal.x = -1.0f;
-                    }
-                    else if(testAngle >= 3.14159f * 0.25f && testAngle < 3.14159f * 0.75f)
-                    {
-                        sampleX = wallCollisionPoint.x - (float)testX;
-                        normal.y = -1.0f;
-                    }
-                    else if(testAngle < -3.14159f * 0.25f && testAngle >= -3.14159f * 0.75f)
-                    {
-                        sampleX = wallCollisionPoint.x - (float)testX;
-                        normal.y = 1.0f;
-                    }
-                    else if(testAngle >= 3.14159f * 0.75f || testAngle < -3.14159f * 0.75f)
-                    {
-                        sampleX = wallCollisionPoint.y - (float)testY;
-                        normal.x = 1.0f;
-                    }
-                    else
-                    {
-                        sampleX = 0.5;
-                        normal.x = 1.0f;
-                    }
-                    
-                }
-            }
-        }
+
+		// --- Setting up DDA raycasting
+		ofVec2f rayStart = _player->getPosition();
+		ofVec2f rayDir = eye;
+		float rayXUnitStepSize = sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x));
+		float rayYUnitStepSize = sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y));
+		ofVec2f rayUnitStepSize = ofVec2f(rayXUnitStepSize, rayYUnitStepSize); // how much we move along the ray in x and y direction.
+		int rayMapX = int(rayStart.x);
+		int rayMapY = int(rayStart.y);
+		ofVec2f rayLengthByAxis = ofVec2f();
+		int cellStepX = 0;
+		int cellStepY = 0;
+		ofVec2f normalX = ofVec2f();
+		ofVec2f normalY = ofVec2f();
+
+		// DDA Starting conditions
+		if (rayDir.x < 0)
+		{
+			cellStepX = -1;
+			rayLengthByAxis.x = fmod(rayStart.x, 1.0) * rayUnitStepSize.x;
+			normalX.x = 1.0; // Going left on x we can only ever hit right side of the cell.
+		}
+		else
+		{
+			cellStepX = 1;
+			rayLengthByAxis.x = (1.0 - fmod(rayStart.x, 1.0)) * rayUnitStepSize.x;
+			normalX.x = -1.0;
+		}
+
+		if (rayDir.y < 0)
+		{
+			cellStepY = -1;
+			rayLengthByAxis.y = fmod(rayStart.y, 1.0) * rayUnitStepSize.y;
+			normalY.y = 1.0; // going up we can only hit bottom side of a cell
+		}
+		else
+		{
+			cellStepY = 1;
+			rayLengthByAxis.y = (1.0 - fmod(rayStart.y, 1.0)) * rayUnitStepSize.y;
+			normalY.y = -1.0;
+		}
+
+		bool wallFound = false;
+		float castDistance = 0;
+		char mapElement;
+		while (!wallFound && castDistance < _maxTestingDepth)
+		{
+			if (rayLengthByAxis.x < rayLengthByAxis.y)
+				// travel in x distance
+			{
+				rayMapX += cellStepX;
+				castDistance = rayLengthByAxis.x;
+				rayLengthByAxis.x += rayUnitStepSize.x;
+				normal = normalX;
+			}
+			else
+				// travel in y distance
+			{
+				rayMapY += cellStepY;
+				castDistance = rayLengthByAxis.y;
+				rayLengthByAxis.y += rayUnitStepSize.y;
+				normal = normalY;
+			}
+
+			mapElement = _map->getCell(rayMapX, rayMapY);
+			if (mapElement == '#' || mapElement == '$')
+			{
+				wallFound = true;
+			}
+		}
+
+		ofVec2f intersection = ofVec2f();
+		if (wallFound)
+		{
+			intersection = rayStart + rayDir * castDistance;
+		}
+		else
+		{
+			continue;
+		}
+
+        float distanceToSurface = castDistance;
+        float sampleX = 0;
         
         // To calculate line length can't use the distance to surface directly.
         ofVec2f alongEye(eye * distanceToSurface);
@@ -192,36 +208,37 @@ void Renderer::draw()
         }
         
         int wallHeight = maxY - minY;
-        
-        //float lightIntensity = 1.0f - ((eye.dot(normal) + 1.0f) / 2.0f);
-        float lightIntensity = (eye.dot(normal)); // + 1.0f) / 2.0f);
-        if (lightIntensity < 0.0f)
-        {
-            lightIntensity = 0.0f;
-        }
-        lightIntensity *= 0.75f;
-        lightIntensity += 0.25f;
-        
+
+		// Light intensity is currently just doing dot product between
+		// intersection wall normal and light direction.
+		float lightIntensity = 1.0f - ((_lightDirection.dot(normal) + 1.0f) / 2.0f);
+
+		// Remap light intensity to 0.25-1.0 range.
+        lightIntensity *= 0.5f;
+        lightIntensity += 0.5f;
+
+		maxY = min(maxY, _resY);
+		minY = max(minY, 0);
+
         for(int y = minY; y < maxY; y++)
-        {
-            if (y < 0 || y >= _resY) { continue; };
-            
+        {            
             float sampleY = 1023.0f * ((float)(y - minY) / (float)(maxY - minY));
             if (sampleY > 1023.0f)
             {
                 sampleY = 1023.0f;
             }
             
-            if (wall == mapElement)
+            if ('#' == mapElement)
             {
 				//pixelColor = _tex.getColor((int)sampleX, (int)sampleY);
                 pixelColor = ofColor(255, 230, 150);
             }
-            else if (metalWall == mapElement)
+            else if ('$' == mapElement)
             {
 				//pixelColor = _texMetal.getColor((int)sampleX, (int)sampleY);
                 pixelColor = ofColor(200, 230, 250);
             }
+			pixelColor *= lightIntensity;
             //pixelColor = ofColor(255, 255, 255);
             //pixelColor *= (1.0f - (medianDistance / 16.0f * 0.95f)); // depth shading
             float fogAmount = medianDistance / 16.0f * 0.9f;
