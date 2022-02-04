@@ -100,28 +100,34 @@ void Renderer::draw()
 		ofVec2f rayLengthByAxis = ofVec2f();
 		int cellStepX = 0;
 		int cellStepY = 0;
+		ofVec2f normalX = ofVec2f();
+		ofVec2f normalY = ofVec2f();
 
 		// DDA Starting conditions
 		if (rayDir.x < 0)
 		{
 			cellStepX = -1;
 			rayLengthByAxis.x = fmod(rayStart.x, 1.0) * rayUnitStepSize.x;
+			normalX.x = 1.0; // Going left on x we can only ever hit right side of the cell.
 		}
 		else
 		{
 			cellStepX = 1;
 			rayLengthByAxis.x = (1.0 - fmod(rayStart.x, 1.0)) * rayUnitStepSize.x;
+			normalX.x = -1.0;
 		}
 
 		if (rayDir.y < 0)
 		{
 			cellStepY = -1;
 			rayLengthByAxis.y = fmod(rayStart.y, 1.0) * rayUnitStepSize.y;
+			normalY.y = 1.0; // going up we can only hit bottom side of a cell
 		}
 		else
 		{
 			cellStepY = 1;
 			rayLengthByAxis.y = (1.0 - fmod(rayStart.y, 1.0)) * rayUnitStepSize.y;
+			normalY.y = -1.0;
 		}
 
 		bool wallFound = false;
@@ -135,6 +141,7 @@ void Renderer::draw()
 				rayMapX += cellStepX;
 				castDistance = rayLengthByAxis.x;
 				rayLengthByAxis.x += rayUnitStepSize.x;
+				normal = normalX;
 			}
 			else
 				// travel in y distance
@@ -142,6 +149,7 @@ void Renderer::draw()
 				rayMapY += cellStepY;
 				castDistance = rayLengthByAxis.y;
 				rayLengthByAxis.y += rayUnitStepSize.y;
+				normal = normalY;
 			}
 
 			mapElement = _map->getCell(rayMapX, rayMapY);
@@ -200,22 +208,20 @@ void Renderer::draw()
         }
         
         int wallHeight = maxY - minY;
-        
-        //float lightIntensity = 1.0f - ((eye.dot(normal) + 1.0f) / 2.0f);
-		/*
-        float lightIntensity = (eye.dot(normal)); // + 1.0f) / 2.0f);
-        if (lightIntensity < 0.0f)
-        {
-            lightIntensity = 0.0f;
-        }
-        lightIntensity *= 0.75f;
-        lightIntensity += 0.25f;
-        */
+
+		// Light intensity is currently just doing dot product between
+		// intersection wall normal and light direction.
+		float lightIntensity = 1.0f - ((_lightDirection.dot(normal) + 1.0f) / 2.0f);
+
+		// Remap light intensity to 0.25-1.0 range.
+        lightIntensity *= 0.5f;
+        lightIntensity += 0.5f;
+
+		maxY = min(maxY, _resY);
+		minY = max(minY, 0);
 
         for(int y = minY; y < maxY; y++)
-        {
-            if (y < 0 || y >= _resY) { continue; };
-            
+        {            
             float sampleY = 1023.0f * ((float)(y - minY) / (float)(maxY - minY));
             if (sampleY > 1023.0f)
             {
@@ -232,6 +238,7 @@ void Renderer::draw()
 				//pixelColor = _texMetal.getColor((int)sampleX, (int)sampleY);
                 pixelColor = ofColor(200, 230, 250);
             }
+			pixelColor *= lightIntensity;
             //pixelColor = ofColor(255, 255, 255);
             //pixelColor *= (1.0f - (medianDistance / 16.0f * 0.95f)); // depth shading
             float fogAmount = medianDistance / 16.0f * 0.9f;
