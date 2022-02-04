@@ -21,6 +21,11 @@ Renderer::Renderer() :
 	_debugFOVPoints.clear();
 
     _allocateRenderBuffer();
+
+	_tex.setUseTexture(false);
+	_tex.load("TexConcrete1024.png");
+	_texMetal.setUseTexture(false);
+	_texMetal.load("TexMetal1024.png");
 }
 
 void Renderer::setDebugDrawing(bool state)
@@ -102,6 +107,7 @@ void Renderer::draw()
 		int cellStepY = 0;
 		ofVec2f normalX = ofVec2f();
 		ofVec2f normalY = ofVec2f();
+		bool hDirection = false; // which direction was the last hit in, true = horizontal
 
 		// DDA Starting conditions
 		if (rayDir.x < 0)
@@ -133,6 +139,7 @@ void Renderer::draw()
 		bool wallFound = false;
 		float castDistance = 0;
 		char mapElement;
+		float texU = 0;
 		while (!wallFound && castDistance < _maxTestingDepth)
 		{
 			if (rayLengthByAxis.x < rayLengthByAxis.y)
@@ -142,6 +149,7 @@ void Renderer::draw()
 				castDistance = rayLengthByAxis.x;
 				rayLengthByAxis.x += rayUnitStepSize.x;
 				normal = normalX;
+				hDirection = true;
 			}
 			else
 				// travel in y distance
@@ -150,6 +158,7 @@ void Renderer::draw()
 				castDistance = rayLengthByAxis.y;
 				rayLengthByAxis.y += rayUnitStepSize.y;
 				normal = normalY;
+				hDirection = false;
 			}
 
 			mapElement = _map->getCell(rayMapX, rayMapY);
@@ -163,6 +172,14 @@ void Renderer::draw()
 		if (wallFound)
 		{
 			intersection = rayStart + rayDir * castDistance;
+			if (hDirection)
+			{
+				texU = fmod(intersection.y, 1.0);
+			}
+			else
+			{
+				texU = fmod(intersection.x, 1.0);
+			}
 		}
 		else
 		{
@@ -170,7 +187,7 @@ void Renderer::draw()
 		}
 
         float distanceToSurface = castDistance;
-        float sampleX = 0;
+        float sampleX = texU;
         
         // To calculate line length can't use the distance to surface directly.
         ofVec2f alongEye(eye * distanceToSurface);
@@ -230,13 +247,13 @@ void Renderer::draw()
             
             if ('#' == mapElement)
             {
-				//pixelColor = _tex.getColor((int)sampleX, (int)sampleY);
-                pixelColor = ofColor(255, 230, 150);
+				pixelColor = _tex.getColor((int)sampleX, (int)sampleY);
+                //pixelColor = ofColor(255, 230, 150);
             }
             else if ('$' == mapElement)
             {
-				//pixelColor = _texMetal.getColor((int)sampleX, (int)sampleY);
-                pixelColor = ofColor(200, 230, 250);
+				pixelColor = _texMetal.getColor((int)sampleX, (int)sampleY);
+                //pixelColor = ofColor(200, 230, 250);
             }
 			pixelColor *= lightIntensity;
             //pixelColor = ofColor(255, 255, 255);
