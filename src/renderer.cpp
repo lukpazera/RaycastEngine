@@ -10,7 +10,7 @@ Renderer::Renderer() :
     _tex1("TexConcrete1024.png")
 {
     _fov = 3.14159 / 2.0f;
-	_heightSquashFactor = 1.77f;
+	_heightSquashFactor = 2.1f;
     _maxTestingDepth = 16.0f;
     
     _lightAngle = 3.14159 / 3.0;
