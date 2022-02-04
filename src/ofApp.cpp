@@ -2,7 +2,6 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    _slowestFrame = 0;
 	_debugDrawing = false;
     
     _player.setMap(&_map);
@@ -25,12 +24,6 @@ void ofApp::update()
 void ofApp::draw()
 {    
     _renderer.draw();
-
-    double lastFrameTime = ofGetLastFrameTime();
-    if (lastFrameTime > _slowestFrame)
-    {
-        _slowestFrame = lastFrameTime;
-    }
     
 	if (_debugDrawing)
 	{
@@ -38,8 +31,8 @@ void ofApp::draw()
 		_player.draw();
 	}
 
-	int fpsval = (int)(1.0 / lastFrameTime);
-	std::string fps = std::to_string(fpsval);
+	int fpsval = int(ofGetFrameRate());
+	std::string fps = ofToString(fpsval);
 	ofDrawBitmapStringHighlight(fps, 40, 40);
 
 	if (_debugDrawing)

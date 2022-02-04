@@ -35,6 +35,5 @@ private:
     ofImage _texMetal;
     ofImage _bg;
     
-    double _slowestFrame;
 	bool _debugDrawing;
 };
