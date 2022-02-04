@@ -234,10 +234,12 @@ void Renderer::draw()
         lightIntensity *= 0.5f;
         lightIntensity += 0.5f;
 
-		maxY = min(maxY, _resY);
-		minY = max(minY, 0);
+		// these are used for drawing but we still need to preserve
+		// unclamped min and max Y for texture sampling.
+		float drawMaxY = min(maxY, _resY);
+		float drawMinY = max(minY, 0);
 
-        for(int y = minY; y < maxY; y++)
+        for(int y = drawMinY; y < drawMaxY; y++)
         {            
             float sampleY = 1023.0f * ((float)(y - minY) / (float)(maxY - minY));
             if (sampleY > 1023.0f)
