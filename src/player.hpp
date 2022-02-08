@@ -15,6 +15,7 @@ public:
     float getLookAtAngle() const;
     
     void move(float distance);
+	void sideStep(float distance);
     void rotate(float angle);
     
 	void draw();

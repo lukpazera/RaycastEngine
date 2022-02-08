@@ -41,6 +41,30 @@ void Player::move(float distance)
     _playerPosition = newPosition;
 }
 
+void Player::sideStep(float distance)
+{
+	float moveAngle = 0.0f;
+	if (distance > 0) // moving to the right
+	{
+		moveAngle = _playerLookAtAngle - (PI / 2.0f);
+
+	}
+	else // moving to the left
+	{
+		moveAngle = _playerLookAtAngle + (PI / 2.0f);
+	}
+
+	ofVec2f moveDirection = ofVec2f();
+	moveDirection.x = sinf(moveAngle);
+	moveDirection.y = cosf(moveAngle);
+	ofVec2f newPosition = _playerPosition + (moveDirection * abs(distance));
+	if (_map->isWall((int)newPosition.x, (int)newPosition.y))
+	{
+		return;
+	}
+	_playerPosition = newPosition;
+}
+
 /*
  * Rotates player in place by a given angle in radians.
  * Increasing angle rotates player counterclockwise.
