@@ -47,20 +47,20 @@ void ofApp::keyPressed(int key){
     if (key == 'd')
     {
 		// Decrease angle to rotate clockwise
-        _player.rotate(-0.2f); // * ofGetLastFrameTime());
+        _player.sideStep(20.0f * ofGetLastFrameTime());
     }
     else if (key == 'a')
     {
 		// Increase angle to rotate counterclockwise
-        _player.rotate(0.2f); // * ofGetLastFrameTime());
+        _player.sideStep(-20.0f * ofGetLastFrameTime());
     }
     else if (key == 'w')
     {
-        _player.move(0.6f); // * ofGetLastFrameTime());
+        _player.move(20.0f * ofGetLastFrameTime());
     }
     else if (key == 's')
     {
-        _player.move(-0.6f);// * ofGetLastFrameTime());
+        _player.move(-20.0f * ofGetLastFrameTime());
     }
     
     // Increase/descrease resolution
@@ -88,7 +88,12 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
+	int prevx = ofGetPreviousMouseX();
+	int offsetX = x - prevx;
+	if (offsetX != 0)
+	{
+		_player.rotate(float(offsetX) * -0.01);
+	}
 }
 
 //--------------------------------------------------------------
