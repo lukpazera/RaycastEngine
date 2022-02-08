@@ -154,8 +154,8 @@ void Renderer::draw()
 		float lightIntensity = 1.0f - ((_lightDirection.dot(normal) + 1.0f) / 2.0f);
 
 		// Remap light intensity to 0.25-1.0 range.
-        lightIntensity *= 0.5f;
-        lightIntensity += 0.5f;
+        lightIntensity *= 0.75f;
+        lightIntensity += 0.75f;
 
 		// these are used for drawing but we still need to preserve
 		// unclamped min and max Y for texture sampling.
