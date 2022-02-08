@@ -6,7 +6,7 @@
 #include "map.hpp"
 #include "player.hpp"
 #include "texture.hpp"
-
+#include "ddaRaycaster.h"
 
 class Renderer
 {
@@ -49,6 +49,7 @@ private:
     ofImage _buffer;
     Map* _map;
     Player* _player;
+	DDARaycaster _raycaster;
 
     float _fov;
 	float _heightSquashFactor;

@@ -99,101 +99,19 @@ void Renderer::draw()
 		eye.normalize();
 		ofVec2f normal(0, 0);
 
-		// --- Setting up DDA raycasting
-		ofVec2f rayStart = _player->getPosition();
-		ofVec2f rayDir = eye;
-		float rayXUnitStepSize = sqrt(1 + (rayDir.y / rayDir.x) * (rayDir.y / rayDir.x));
-		float rayYUnitStepSize = sqrt(1 + (rayDir.x / rayDir.y) * (rayDir.x / rayDir.y));
-		ofVec2f rayUnitStepSize = ofVec2f(rayXUnitStepSize, rayYUnitStepSize); // how much we move along the ray in x and y direction.
-		int rayMapX = int(rayStart.x);
-		int rayMapY = int(rayStart.y);
-		ofVec2f rayLengthByAxis = ofVec2f();
-		int cellStepX = 0;
-		int cellStepY = 0;
-		ofVec2f normalX = ofVec2f();
-		ofVec2f normalY = ofVec2f();
-		bool hDirection = false; // which direction was the last hit in, true = horizontal
+		// call raycast here
+		RayHit hit;
 
-		// DDA Starting conditions
-		if (rayDir.x < 0)
-		{
-			cellStepX = -1;
-			rayLengthByAxis.x = fmod(rayStart.x, 1.0) * rayUnitStepSize.x;
-			normalX.x = 1.0; // Going left on x we can only ever hit right side of the cell.
-		}
-		else
-		{
-			cellStepX = 1;
-			rayLengthByAxis.x = (1.0 - fmod(rayStart.x, 1.0)) * rayUnitStepSize.x;
-			normalX.x = -1.0;
-		}
-
-		if (rayDir.y < 0)
-		{
-			cellStepY = -1;
-			rayLengthByAxis.y = fmod(rayStart.y, 1.0) * rayUnitStepSize.y;
-			normalY.y = 1.0; // going up we can only hit bottom side of a cell
-		}
-		else
-		{
-			cellStepY = 1;
-			rayLengthByAxis.y = (1.0 - fmod(rayStart.y, 1.0)) * rayUnitStepSize.y;
-			normalY.y = -1.0;
-		}
-
-		bool wallFound = false;
-		float castDistance = 0;
-		char mapElement;
-		float texU = 0;
-		while (!wallFound && castDistance < _maxTestingDepth)
-		{
-			if (rayLengthByAxis.x < rayLengthByAxis.y)
-				// travel in x distance
-			{
-				rayMapX += cellStepX;
-				castDistance = rayLengthByAxis.x;
-				rayLengthByAxis.x += rayUnitStepSize.x;
-				normal = normalX;
-				hDirection = true;
-			}
-			else
-				// travel in y distance
-			{
-				rayMapY += cellStepY;
-				castDistance = rayLengthByAxis.y;
-				rayLengthByAxis.y += rayUnitStepSize.y;
-				normal = normalY;
-				hDirection = false;
-			}
-
-			mapElement = _map->getCell(rayMapX, rayMapY);
-			if (mapElement == '#' || mapElement == '$')
-			{
-				wallFound = true;
-			}
-		}
-
-		ofVec2f intersection = ofVec2f();
-		if (wallFound)
-		{
-			intersection = rayStart + rayDir * castDistance;
-			if (hDirection)
-			{
-				texU = fmod(intersection.y, 1.0);
-			}
-			else
-			{
-				texU = fmod(intersection.x, 1.0);
-			}
-		}
-		else
+		if (!_raycaster.raycast(_player->getPosition(), eye, hit))
 		{
 			continue;
 		}
 
-        float distanceToSurface = castDistance;
-        float sampleX = texU;
-        
+        float distanceToSurface = hit.distance;
+        float sampleX = hit.texU;
+		normal = hit.normal;
+		char mapElement = hit.mapElement;
+
         // To calculate line length can't use the distance to surface directly.
         ofVec2f alongEye(eye * distanceToSurface);
 
@@ -319,6 +237,7 @@ void Renderer::draw()
 void Renderer::setMap(Map *map)
 {
     _map = map;
+	_raycaster.setMap(*_map);
 }
 
 void Renderer::setPlayer(Player* player)
