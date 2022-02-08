@@ -26,6 +26,11 @@ Renderer::Renderer() :
 	_tex.load("TexConcrete1024.png");
 	_texMetal.setUseTexture(false);
 	_texMetal.load("TexMetal1024.png");
+
+}
+
+Renderer::~Renderer()
+{
 }
 
 void Renderer::setDebugDrawing(bool state)
