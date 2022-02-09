@@ -3,8 +3,9 @@
 
 //========================================================================
 int main( ){
-	ofSetupOpenGL(640,360,OF_FULLSCREEN);			// <-------- setup the GL context
+	ofSetupOpenGL(1280,720,OF_FULLSCREEN);			// <-------- setup the GL context
 	ofSetVerticalSync(false);
+	ofHideCursor();
 	// this kicks off the running of my app
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
