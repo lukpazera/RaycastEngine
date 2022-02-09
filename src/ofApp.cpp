@@ -3,7 +3,12 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 	_debugDrawing = false;
-    
+	_moveSpeed = 4.0f;
+	_moveForward = false;
+	_moveBackward = false;
+	_moveLeft = false;
+	_moveRight = false;
+
     _player.setMap(&_map);
     
     _renderer.setMap(&_map);
@@ -17,6 +22,23 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update()
 {
+	if (_moveRight)
+	{
+		_player.sideStep(_moveSpeed * 0.5 * ofGetLastFrameTime());
+	}
+    if (_moveLeft)
+	{
+		_player.sideStep(-_moveSpeed * 0.5 * ofGetLastFrameTime());
+	}
+	if (_moveForward)
+	{
+		_player.move(_moveSpeed * ofGetLastFrameTime());
+	}
+	if (_moveBackward)
+	{
+		_player.move(-_moveSpeed * ofGetLastFrameTime());
+	}
+
     _renderer.update();
 }
 
@@ -34,6 +56,7 @@ void ofApp::draw()
 	int fpsval = int(ofGetFrameRate());
 	std::string fps = ofToString(fpsval);
 	ofDrawBitmapStringHighlight(fps, 40, 40);
+	ofDrawBitmapStringHighlight(ofToString(ofGetLastFrameTime()), 40, 120);
 
 	if (_debugDrawing)
 	{
@@ -46,21 +69,19 @@ void ofApp::draw()
 void ofApp::keyPressed(int key){
     if (key == 'd')
     {
-		// Decrease angle to rotate clockwise
-        _player.sideStep(20.0f * ofGetLastFrameTime());
+		_moveRight = true;
     }
     else if (key == 'a')
     {
-		// Increase angle to rotate counterclockwise
-        _player.sideStep(-20.0f * ofGetLastFrameTime());
+		_moveLeft = true;
     }
     else if (key == 'w')
     {
-        _player.move(20.0f * ofGetLastFrameTime());
+		_moveForward = true;
     }
     else if (key == 's')
     {
-        _player.move(-20.0f * ofGetLastFrameTime());
+		_moveBackward = true;
     }
     
     // Increase/descrease resolution
@@ -83,7 +104,22 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+	if (key == 'd')
+	{
+		_moveRight = false;
+	}
+	else if (key == 'a')
+	{
+		_moveLeft = false;
+	}
+	else if (key == 'w')
+	{
+		_moveForward = false;
+	}
+	else if (key == 's')
+	{
+		_moveBackward = false;
+	}
 }
 
 //--------------------------------------------------------------

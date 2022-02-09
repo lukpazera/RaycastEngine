@@ -36,4 +36,10 @@ private:
     ofImage _bg;
     
 	bool _debugDrawing;
+	float _moveSpeed;
+	bool _moveForward;
+	bool _moveBackward;
+	bool _moveLeft;
+	bool _moveRight;
+
 };
