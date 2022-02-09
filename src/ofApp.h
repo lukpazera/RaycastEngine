@@ -41,5 +41,5 @@ private:
 	bool _moveBackward;
 	bool _moveLeft;
 	bool _moveRight;
-
+	bool _mouseWrapped;
 };

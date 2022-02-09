@@ -8,6 +8,7 @@ void ofApp::setup(){
 	_moveBackward = false;
 	_moveLeft = false;
 	_moveRight = false;
+	_mouseWrapped = false;
 
     _player.setMap(&_map);
     
@@ -124,12 +125,37 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
+	// Wrapping mouse will call this event.
+	// We don't want to process wrapped mouse coords again
+	// so when the call after manual wrap happens just set wrap to false
+	// and return early.
+	// The next call will be processed properly.
+	if (_mouseWrapped)
+	{
+		_mouseWrapped = false;
+		return;
+	}
+
 	int prevx = ofGetPreviousMouseX();
 	int offsetX = x - prevx;
 	if (offsetX != 0)
 	{
 		_player.rotate(float(offsetX) * -0.01);
 	}
+
+// Windows specific code for handling mouse wrapping
+#if defined( TARGET_WIN32 )
+	if (x < 10)
+	{
+		SetCursorPos(x + ofGetWidth() / 2, ofGetHeight() / 2);
+		_mouseWrapped = true;
+	}
+	else if (x > (ofGetWidth() - 10))
+	{
+		SetCursorPos(x - ofGetWidth() / 2, ofGetHeight() / 2);
+		_mouseWrapped = true;
+	}
+#endif
 }
 
 //--------------------------------------------------------------
