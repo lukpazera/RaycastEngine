@@ -46,20 +46,19 @@ void Renderer::update()
 void Renderer::draw()
 {
 	// Background
-	ofColor sky(67, 94, 163);
+    ofColor groundClose(88, 96, 104);
+    ofColor groundFar(16, 16, 16);
+    ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
+	ofColor sky(130, 150, 165);
 	ofSetColor(sky);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
-
-    //ofColor groundClose(91, 91, 91);
-    //ofColor groundFar(0, 0, 0);
-    //ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
-   
     
     int columns = _resX;
     float centerX = _resX / 2;
     float centerY = _resY / 2;
 
-    _buffer.setColor(sky);
+	_buffer.setColor(ofColor(32, 0)); // mid gray and alpha to 0
+	ofSetColor(255, 255, 255);
 
     float lightIntensity = (_player->getDirection().dot(_lightDirection) + 1.0f) / 2.0f;
 
@@ -154,8 +153,8 @@ void Renderer::draw()
 		float lightIntensity = 1.0f - ((_lightDirection.dot(normal) + 1.0f) / 2.0f);
 
 		// Remap light intensity to 0.25-1.0 range.
-        lightIntensity *= 0.75f;
-        lightIntensity += 0.75f;
+        lightIntensity *= 1.0f;
+        lightIntensity += 0.5f;
 
 		// these are used for drawing but we still need to preserve
 		// unclamped min and max Y for texture sampling.
@@ -194,9 +193,8 @@ void Renderer::draw()
             pixelColor.lerp(depthColor, fogAmount);
             pixelColor.a = 255;
       
-
-			int index = (y * _resX + x) * 3;
-			memcpy(&_buffer.getPixels()[index], &pixelColor, 3);
+			int index = (y * _resX + x) * 4;
+			memcpy(&_buffer.getPixels()[index], &pixelColor, 4);
 
             //ofSetColor(pixelColor);
             //ofDrawRectangle(x * 2, y * 2, 2, 2);
@@ -231,6 +229,8 @@ void Renderer::draw()
 	//_buffer.setFromPixels(_pixels);
     _buffer.update();
 	_buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
+
+	//_tex.drawSubsection(24, 0, 16, 512, 0, 0, 1, 256);
 	_drawDebug();
 }
 
@@ -273,7 +273,7 @@ void Renderer::_allocateRenderBuffer()
 {
     _calculateRenderSize();
     _buffer.clear();
-    _buffer.allocate(_resX, _resY, OF_IMAGE_COLOR);
+    _buffer.allocate(_resX, _resY, OF_IMAGE_COLOR_ALPHA);
 }
 
 void Renderer::_drawDebug()
