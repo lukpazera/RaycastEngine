@@ -10,7 +10,6 @@ Renderer::Renderer() :
     _tex1("TexConcrete1024.png")
 {
     _fov = 3.14159 / 2.0f;
-	_heightSquashFactor = 2.1f;
     _maxTestingDepth = 16.0f;
     
     _lightAngle = 3.14159 / 3.0;
@@ -91,6 +90,12 @@ void Renderer::draw()
 	float visionLineLength = visionLine.length();
 	float visionLineStep = visionLineLength / float(columns);
 
+	// Note that vision line length says how many cells fit into view horizontally.
+	// We can use this to know the height of a cell in pixels from any distance.
+	float aspectRatio = float(_resX) / float(_resY);
+	float vcells = visionLineLength / aspectRatio; // how many cells fit view vertically when viewed from distance of 1
+	float dist1Height = float(_resY) * vcells; // height of a wall in pixels when viewed from distance of 1.
+
     for (int x = 0; x < columns; x++)
     {
 		ofVec2f eye = eyeStart + (visionLineNorm * float(x) * visionLineStep);
@@ -120,15 +125,20 @@ void Renderer::draw()
         float cameraDistance = _player->getDirection().dot(alongEye);
 		float medianDistance = cameraDistance;
 
-        int height = _resY;
+        //int height = _resY;
         
-		// Height squash factor is used to compress vertical lines so walls look square rather than
-		// being alongated on Y
-		int minY = (float)(height / 2) - height / (medianDistance * _heightSquashFactor); 
-        
-        int maxY = height - minY;
-        float distanceShade = 255.0 - (medianDistance * 16.0f);
-        float brightnessBoost = ((16.0f - medianDistance) / 16.0f) * 0.5f + 1.0f;
+		// Calculate height of a wall in pixels.
+		int wallHeight = int(dist1Height / cameraDistance);
+
+		// minY is where we should start drawing wall from vertically in pixels
+		// it's unclipped here so it'll be negative when we're very close to the wall
+		// maxY is where we should stop drawing wall at vertically in pixels
+		// again, unclipped so will be large number, out of the bounds of the screen
+		int minY = (_resY - wallHeight) / 2;
+        int maxY = _resY - minY;
+
+        //float distanceShade = 255.0 - (medianDistance * 16.0f);
+        //float brightnessBoost = ((16.0f - medianDistance) / 16.0f) * 0.5f + 1.0f;
         // Get color from texture.
         
         //int shade = (int)(distanceShade * sampleX);
@@ -146,7 +156,7 @@ void Renderer::draw()
             sampleX = 1023.0f;
         }
         
-        int wallHeight = maxY - minY;
+        //int wallHeight = maxY - minY;
 
 		// Light intensity is currently just doing dot product between
 		// intersection wall normal and light direction.
@@ -196,37 +206,21 @@ void Renderer::draw()
 			int index = (y * _resX + x) * 4;
 			memcpy(&_buffer.getPixels()[index], &pixelColor, 4);
 
-            //ofSetColor(pixelColor);
-            //ofDrawRectangle(x * 2, y * 2, 2, 2);
-            //_buffer.setColor(x, y, pixelColor);
-			//int index = (y * _resX + x) * 3;
-			
-			//_buffer.getPixels()[index] = pixelColor.r;
-			
-			// This is drawing pixel
-			//_buffer.getPixels()[index+1] = pixelColor.g;
-			
-			
-			//_buffer.getPixels()[index+2] = pixelColor.b;
-
-			//_buffer.getPixels().setColor(x, y, pixelColor);
-
-            int refY = wallHeight - (y - minY) + maxY - 1;
+            //int refY = wallHeight - (y - minY) + maxY - 1;
             
-            if (refY < _resY)
-            {
-                float gradient = (float)(y - minY)/ (float)(maxY - minY);
+            //if (refY < _resY)
+            //{
+                //float gradient = (float)(y - minY)/ (float)(maxY - minY);
                 
                 //ofColor refPixelColor = pixelColor * 0.5f;
                 //refPixelColor.a = (int)(gradient * 160.0);
                 //_buffer.setColor(x, refY, refPixelColor);
                 //ofSetColor(refPixelColor);
                 //ofDrawRectangle(x * 2, refY * 2, 2, 2);
-            }
+            //}
             //ofDrawLine(x*2, y*2, x*2+1, y*2);
         }
     }
-	//_buffer.setFromPixels(_pixels);
     _buffer.update();
 	_buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
 
@@ -291,7 +285,7 @@ void Renderer::_drawDebug()
 
 	for (int i = 0; i < _debugFOVPoints.size(); i+=16)
 	{
-		ofVec2f p = p1 + (_debugFOVPoints.at(i) * cellSize * 5);
+		ofVec2f p = p1 + (_debugFOVPoints.at(i) * cellSize * 1);
 		ofSetColor(255, 128, 255);
 		ofDrawCircle(p, 1);
 	}

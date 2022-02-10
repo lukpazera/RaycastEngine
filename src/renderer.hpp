@@ -52,7 +52,6 @@ private:
 	DDARaycaster _raycaster;
 
     float _fov;
-	float _heightSquashFactor;
     float _maxTestingDepth;
     float _lightAngle;
     ofVec2f _lightDirection;
