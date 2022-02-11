@@ -125,8 +125,6 @@ void CPURenderer::draw()
 
         float cameraDistance = _player->getDirection().dot(alongEye);
 		float medianDistance = cameraDistance;
-
-        //int height = _resY;
         
 		// Calculate height of a wall in pixels.
 		int wallHeight = int(dist1Height / cameraDistance);
@@ -138,17 +136,6 @@ void CPURenderer::draw()
 		int minY = (_resY - wallHeight) / 2;
         int maxY = _resY - minY;
 
-        //float distanceShade = 255.0 - (medianDistance * 16.0f);
-        //float brightnessBoost = ((16.0f - medianDistance) / 16.0f) * 0.5f + 1.0f;
-        // Get color from texture.
-        
-        //int shade = (int)(distanceShade * sampleX);
-        //if (shade < 0) {
-        //    shade = 0;
-        //}
-        
-        //ofSetColor(shade, shade, shade);
-        //ofDrawRectangle(x * 4, minY * 4, 4, (maxY - minY) * 4);
         ofColor pixelColor;
         
         sampleX = sampleX * 1023.0f;
@@ -157,8 +144,6 @@ void CPURenderer::draw()
             sampleX = 1023.0f;
         }
         
-        //int wallHeight = maxY - minY;
-
 		// Light intensity is currently just doing dot product between
 		// intersection wall normal and light direction.
 		float lightIntensity = 1.0f - ((_lightDirection.dot(normal) + 1.0f) / 2.0f);
@@ -191,35 +176,15 @@ void CPURenderer::draw()
                 //pixelColor = ofColor(200, 230, 250);
             }
 			pixelColor *= lightIntensity;
-            //pixelColor = ofColor(255, 255, 255);
-            //pixelColor *= (1.0f - (medianDistance / 16.0f * 0.95f)); // depth shading
             float fogAmount = medianDistance / 16.0f * 0.9f;
-            
-            //pixelColor *= (lightIntensity);// * 0.5f + 0.5f) ;
-            //pixelColor *= brightnessBoost;
             
             ofColor depthColor(20, 20, 20);
             depthColor *= 0.25f;
-            //ofColor depthShaded = pixelColor.lerp(depthColor, fogAmount);
             pixelColor.lerp(depthColor, fogAmount);
             pixelColor.a = 255;
       
 			int index = (y * _resX + x) * 4;
 			memcpy(&_buffer.getPixels()[index], &pixelColor, 4);
-
-            //int refY = wallHeight - (y - minY) + maxY - 1;
-            
-            //if (refY < _resY)
-            //{
-                //float gradient = (float)(y - minY)/ (float)(maxY - minY);
-                
-                //ofColor refPixelColor = pixelColor * 0.5f;
-                //refPixelColor.a = (int)(gradient * 160.0);
-                //_buffer.setColor(x, refY, refPixelColor);
-                //ofSetColor(refPixelColor);
-                //ofDrawRectangle(x * 2, refY * 2, 2, 2);
-            //}
-            //ofDrawLine(x*2, y*2, x*2+1, y*2);
         }
     }
     _buffer.update();
