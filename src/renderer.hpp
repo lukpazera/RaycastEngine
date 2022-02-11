@@ -14,11 +14,17 @@ public:
     Renderer();
 	~Renderer();
 
-    void update();
-    void draw();
+	virtual void update() {};
+	virtual void draw() {};
+	virtual void onInit() {};
+	virtual void onResolutionChanged() {};
 
+	void setFOV(float fov); // in radians
+	void setRenderingDepth(int depth); // in map cells
     void setMap(Map* map);
     void setPlayer(Player* player);
+	void setLightAngle(float angle);
+	void setLightIntensity(float intensity);
 
     void increaseResolution();
     void decreaseResolution();
@@ -29,11 +35,6 @@ private:
     /* Calculates new render size based on resolution multiplier.
      */
     void _calculateRenderSize();
-    
-    /*
-     * Reallocates render image buffer.
-     */
-    void _allocateRenderBuffer();
     
 	void _drawDebug();
 
@@ -46,7 +47,6 @@ private:
     // 2 means pixels will be 2x2, etc.
     int _resMultiplier;
     
-    ofImage _buffer;
     Map* _map;
     Player* _player;
 	DDARaycaster _raycaster;
@@ -54,11 +54,8 @@ private:
     float _fov;
     float _maxTestingDepth;
     float _lightAngle;
+	float _lightIntensity;
     ofVec2f _lightDirection;
-    
-    ofImage _tex;
-    ofImage _texMetal;
-    Texture _tex1;
 
 	bool _debugDrawing;
 	vector<ofVec2f> _debugRays;
