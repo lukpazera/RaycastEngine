@@ -79,7 +79,7 @@ bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, RayHit
 		}
 
 		mapElement = _map->getCell(rayMapX, rayMapY);
-		if (mapElement == '$' || mapElement == '#')
+		if (_map->isWall(rayMapX, rayMapY))
 		{
 			wallFound = true;
 		}
