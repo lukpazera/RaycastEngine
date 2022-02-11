@@ -14,10 +14,6 @@ void ofApp::setup(){
     
     _renderer.setMap(&_map);
     _renderer.setPlayer(&_player);
-    
-    _tex.load("TexConcrete1024.png");
-    _texMetal.load("TexMetal1024.png");
-    _bg.load("Background.png");
 }
 
 //--------------------------------------------------------------

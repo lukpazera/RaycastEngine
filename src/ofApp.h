@@ -5,7 +5,7 @@
 #include "ofVec2f.h"
 #include "map.hpp"
 #include "player.hpp"
-#include "renderer.hpp"
+#include "cpuRenderer.hpp"
 
 class ofApp : public ofBaseApp{
 
@@ -29,11 +29,7 @@ public:
 private:
     Player _player;
     Map _map;
-    Renderer _renderer;
-    
-    ofImage _tex;
-    ofImage _texMetal;
-    ofImage _bg;
+    CPURenderer _renderer;
     
 	bool _debugDrawing;
 	float _moveSpeed;
