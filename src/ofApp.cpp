@@ -12,8 +12,10 @@ void ofApp::setup(){
 
     _player.setMap(&_map);
     
+	_renderer.onInit();
     _renderer.setMap(&_map);
     _renderer.setPlayer(&_player);
+	_renderer.setResolution(ofGetWidth(), ofGetHeight());
 }
 
 //--------------------------------------------------------------
