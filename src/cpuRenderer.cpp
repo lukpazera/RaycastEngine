@@ -20,6 +20,7 @@ CPURenderer::CPURenderer() :
 	_debugFOVPoints.clear();
 
     _allocateRenderBuffer();
+	_buffer.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 
 	_tex.setUseTexture(false);
 	_tex.load("TexConcrete1024.png");
@@ -248,7 +249,7 @@ void CPURenderer::increaseResolution()
 
 void CPURenderer::decreaseResolution()
 {
-    if (_resMultiplier >= 16) { return; }
+    if (_resMultiplier >= 32) { return; }
     _resMultiplier *= 2;
     _allocateRenderBuffer();
 }
