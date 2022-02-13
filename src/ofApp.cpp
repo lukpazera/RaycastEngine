@@ -97,7 +97,7 @@ void ofApp::keyPressed(int key){
 	else if (key == '1')
 	{
 		_debugDrawing = !_debugDrawing;
-		_renderer.setDebugDrawing(_debugDrawing);
+		_renderer.debugDrawing = _debugDrawing;
 	}
 }
 

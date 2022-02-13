@@ -13,11 +13,8 @@
 class CPURenderer : public Renderer
 {
 public:
-    //CPURenderer();
-	//~CPURenderer();
-
     void update() override;
-	void draw() override;
+	void onDraw() override;
 	void onInit() override;
 	void onResolutionChanged() override;
 

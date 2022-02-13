@@ -20,9 +20,18 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::setDebugDrawing(bool state)
+void Renderer::draw()
 {
-	debugDrawing = state;
+	// We'll store rays in vector for later drawing on screen.
+	if (debugDrawing)
+	{
+		debugRays.clear();
+		debugFOVPoints.clear();
+	}
+
+	onDraw();
+
+	if (debugDrawing) { drawDebug(); }
 }
 
 Map* Renderer::getMap() const

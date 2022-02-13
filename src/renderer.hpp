@@ -48,10 +48,11 @@ public:
 	~Renderer();
 
 	virtual void update() {};
-	virtual void draw() {};
+	virtual void onDraw() {};
 	virtual void onInit() {};
 	virtual void onResolutionChanged() {};
 
+	void draw();
 	void setResolution(int x, int y);
 	void setFOV(float fov); // in radians
 	void setRenderingDepth(int depth); // in map cells
@@ -64,8 +65,6 @@ public:
 
     void increaseResolution();
     void decreaseResolution();
-
-	void setDebugDrawing(bool state);
 
 	DDARaycaster raycaster;
 	RenderInfo renderInfo; // read only, do not change this directly!

@@ -22,7 +22,7 @@ void CPURenderer::update()
 
 }
 
-void CPURenderer::draw()
+void CPURenderer::onDraw()
 {
 	// Background
     ofColor groundClose(88, 96, 104);
@@ -38,14 +38,6 @@ void CPURenderer::draw()
 	ofSetColor(255, 255, 255);
 
     float lightIntensity = (getPlayer()->getDirection().dot(lightInfo.direction) + 1.0f) / 2.0f;
-	
-	
-	// We'll store rays in vector for later drawing on screen.
-	if (debugDrawing)
-	{
-		debugRays.clear();
-		debugFOVPoints.clear();
-	}
 
 	// --- Setting up FOV processing
 	// Progressing through FOV needs to go in correct direction, rendering will be flipped
@@ -178,7 +170,6 @@ void CPURenderer::draw()
 	ofDrawBitmapStringHighlight(ofToString(visionLineStep), 100, 200);
 
 	//_tex.drawSubsection(24, 0, 16, 512, 0, 0, 1, 256);
-	if (debugDrawing) { drawDebug(); }
 }
 
 // -------- Private methods
