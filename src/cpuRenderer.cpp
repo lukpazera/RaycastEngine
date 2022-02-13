@@ -1,24 +1,7 @@
 #include "cpuRenderer.hpp"
 
-CPURenderer::CPURenderer() :
-    _map(NULL),
-	_player(NULL),
-	_resX(320),
-	_resY(240),
-    _resMultiplier(4),
-	_debugDrawing(false),
-    _tex1("TexConcrete1024.png")
+void CPURenderer::onInit()
 {
-    _fov = 3.14159 / 2.0f;
-    _maxTestingDepth = 16.0f;
-    
-    _lightAngle = 3.14159 / 3.0;
-    _lightDirection.x = sinf(_lightAngle);
-    _lightDirection.y = cosf(_lightAngle);
-    
-	_debugRays.clear();
-	_debugFOVPoints.clear();
-
     _allocateRenderBuffer();
 	_buffer.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 
@@ -29,13 +12,9 @@ CPURenderer::CPURenderer() :
 
 }
 
-CPURenderer::~CPURenderer()
+void CPURenderer::onResolutionChanged()
 {
-}
-
-void CPURenderer::setDebugDrawing(bool state)
-{
-	_debugDrawing = state;
+	_allocateRenderBuffer();
 }
 
 void CPURenderer::update()
@@ -43,7 +22,7 @@ void CPURenderer::update()
 
 }
 
-void CPURenderer::draw()
+void CPURenderer::onDraw()
 {
 	// Background
     ofColor groundClose(88, 96, 104);
@@ -53,21 +32,12 @@ void CPURenderer::draw()
 	ofSetColor(sky);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
     
-    int columns = _resX;
-    float centerX = _resX / 2;
-    float centerY = _resY / 2;
+    int columns = renderInfo.renderResolutionX;
 
 	_buffer.setColor(ofColor(32, 0)); // mid gray and alpha to 0
 	ofSetColor(255, 255, 255);
 
-    float lightIntensity = (_player->getDirection().dot(_lightDirection) + 1.0f) / 2.0f;
-
-	// We'll store rays in vector for later drawing on screen.
-	if (_debugDrawing)
-	{
-		_debugRays.clear();
-		_debugFOVPoints.clear();
-	}
+    float lightIntensity = (getPlayer()->getDirection().dot(lightInfo.direction) + 1.0f) / 2.0f;
 
 	// --- Setting up FOV processing
 	// Progressing through FOV needs to go in correct direction, rendering will be flipped
@@ -75,8 +45,8 @@ void CPURenderer::draw()
 	// What we do here is we pick start and end angle and create start and end eye vectors
 	// out of these.
 	// We are going to cast rays between these 2 eye start and end vectors.
-	float startRayAngle = (_player->getLookAtAngle() + (_fov / 2));
-	float endRayAngle = (_player->getLookAtAngle() - (_fov / 2));
+	float startRayAngle = (getPlayer()->getLookAtAngle() + (renderInfo.fov / 2));
+	float endRayAngle = (getPlayer()->getLookAtAngle() - (renderInfo.fov / 2));
 	ofVec2f eyeStart(sinf(startRayAngle), cosf(startRayAngle));
 	ofVec2f eyeEnd(sinf(endRayAngle), cosf(endRayAngle));
 
@@ -93,21 +63,22 @@ void CPURenderer::draw()
 
 	// Note that vision line length says how many cells fit into view horizontally.
 	// We can use this to know the height of a cell in pixels from any distance.
-	float aspectRatio = float(_resX) / float(_resY);
-	float vcells = visionLineLength / aspectRatio; // how many cells fit view vertically when viewed from distance of 1
-	float dist1Height = float(_resY) * vcells; // height of a wall in pixels when viewed from distance of 1.
-
+	//float aspectRatio = float(_resX) / float(_resY);
+	//float vcells = visionLineLength / renderInfo.aspectRatio; // how many cells fit view vertically when viewed from distance of 1
+	//float dist1Height = float(renderInfo.renderResolutionY) * vcells; // height of a wall in pixels when viewed from distance of 1.
+	
+	
     for (int x = 0; x < columns; x++)
     {
 		ofVec2f eye = eyeStart + (visionLineNorm * float(x) * visionLineStep);
-		if (_debugDrawing) { _debugFOVPoints.push_back(eye); }
+		if (debugDrawing) { debugFOVPoints.push_back(eye); }
 		eye.normalize();
 		ofVec2f normal(0, 0);
 
 		// call raycast here
 		RayHit hit;
 
-		if (!_raycaster.raycast(_player->getPosition(), eye, hit))
+		if (!raycaster.raycast(getPlayer()->getPosition(), eye, hit))
 		{
 			continue;
 		}
@@ -121,20 +92,21 @@ void CPURenderer::draw()
         ofVec2f alongEye(eye * distanceToSurface);
 
 		// Store ray for debug drawing for later.
-		if (_debugDrawing) { _debugRays.push_back(alongEye); }
+		if (debugDrawing) { debugRays.push_back(alongEye); }
 
-        float cameraDistance = _player->getDirection().dot(alongEye);
+        float cameraDistance = getPlayer()->getDirection().dot(alongEye);
 		float medianDistance = cameraDistance;
-        
+
+		
 		// Calculate height of a wall in pixels.
-		int wallHeight = int(dist1Height / cameraDistance);
+		int wallHeight = int(float(renderInfo.cellPixelSize) / cameraDistance);
 
 		// minY is where we should start drawing wall from vertically in pixels
 		// it's unclipped here so it'll be negative when we're very close to the wall
 		// maxY is where we should stop drawing wall at vertically in pixels
 		// again, unclipped so will be large number, out of the bounds of the screen
-		int minY = (_resY - wallHeight) / 2;
-        int maxY = _resY - minY;
+		int minY = (renderInfo.renderResolutionY - wallHeight) / 2;
+        int maxY = renderInfo.renderResolutionY - minY;
 
         ofColor pixelColor;
         
@@ -146,7 +118,7 @@ void CPURenderer::draw()
         
 		// Light intensity is currently just doing dot product between
 		// intersection wall normal and light direction.
-		float lightIntensity = 1.0f - ((_lightDirection.dot(normal) + 1.0f) / 2.0f);
+		float lightIntensity = 1.0f - ((lightInfo.direction.dot(normal) + 1.0f) / 2.0f);
 
 		// Remap light intensity to 0.25-1.0 range.
         lightIntensity *= 1.0f;
@@ -154,7 +126,7 @@ void CPURenderer::draw()
 
 		// these are used for drawing but we still need to preserve
 		// unclamped min and max Y for texture sampling.
-		float drawMaxY = min(maxY, _resY);
+		float drawMaxY = min(maxY, renderInfo.renderResolutionY);
 		float drawMinY = max(minY, 0);
 
         for(int y = drawMinY; y < drawMaxY; y++)
@@ -182,77 +154,28 @@ void CPURenderer::draw()
             depthColor *= 0.25f;
             pixelColor.lerp(depthColor, fogAmount);
             pixelColor.a = 255;
-      
-			int index = (y * _resX + x) * 4;
+		
+			int index = (y * renderInfo.renderResolutionX + x) * 4;
 			memcpy(&_buffer.getPixels()[index], &pixelColor, 4);
-        }
+		}
+		
     }
     _buffer.update();
-	_buffer.draw(0, 0, ofGetWidth(), ofGetHeight());
+	_buffer.draw(0, 0, renderInfo.outputResolutionX, renderInfo.outputResolutionY);
+
+	ofDrawBitmapStringHighlight(ofToString(renderInfo.hfovCells), 40, 160);
+	ofDrawBitmapStringHighlight(ofToString(renderInfo.vfovCells), 100, 160);
+	ofDrawBitmapStringHighlight(ofToString(renderInfo.cellPixelSize), 200, 160);
+	ofDrawBitmapStringHighlight(ofToString(visionLineLength), 40, 200);
+	ofDrawBitmapStringHighlight(ofToString(visionLineStep), 100, 200);
 
 	//_tex.drawSubsection(24, 0, 16, 512, 0, 0, 1, 256);
-	_drawDebug();
-}
-
-void CPURenderer::setMap(Map *map)
-{
-    _map = map;
-	_raycaster.setMap(*_map);
-}
-
-void CPURenderer::setPlayer(Player* player)
-{
-    _player = player;
-}
-
-void CPURenderer::increaseResolution()
-{
-    if (_resMultiplier == 1) { return; }
-    _resMultiplier /= 2;
-    _allocateRenderBuffer();
-}
-
-void CPURenderer::decreaseResolution()
-{
-    if (_resMultiplier >= 32) { return; }
-    _resMultiplier *= 2;
-    _allocateRenderBuffer();
 }
 
 // -------- Private methods
 
-void CPURenderer::_calculateRenderSize()
-{
-    int screenWidth = ofGetWidth();
-    int screenHeight = ofGetHeight();
-    _resX = screenWidth / _resMultiplier;
-    _resY = screenHeight / _resMultiplier;
-}
-
 void CPURenderer::_allocateRenderBuffer()
 {
-    _calculateRenderSize();
     _buffer.clear();
-    _buffer.allocate(_resX, _resY, OF_IMAGE_COLOR_ALPHA);
-}
-
-void CPURenderer::_drawDebug()
-{
-	if (!_debugDrawing) { return; }
-	
-	float cellSize = float(ofGetHeight() / _map->getHeight());
-	ofVec2f p1 = _player->getPosition() * cellSize;
-	for (auto it = std::begin(_debugRays); it != std::end(_debugRays); ++it)
-	{
-		ofVec2f p2 = ((*it * cellSize) + p1);
-		ofSetColor(255, 0, 64);
-		ofDrawLine(p1, p2);
-	}
-
-	for (int i = 0; i < _debugFOVPoints.size(); i+=16)
-	{
-		ofVec2f p = p1 + (_debugFOVPoints.at(i) * cellSize * 1);
-		ofSetColor(255, 128, 255);
-		ofDrawCircle(p, 1);
-	}
+    _buffer.allocate(renderInfo.renderResolutionX, renderInfo.renderResolutionY, OF_IMAGE_COLOR_ALPHA);
 }
