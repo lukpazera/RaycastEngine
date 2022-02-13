@@ -62,11 +62,7 @@ void CPURenderer::onDraw()
 	float visionLineStep = visionLineLength / float(columns);
 
 	// Note that vision line length says how many cells fit into view horizontally.
-	// We can use this to know the height of a cell in pixels from any distance.
-	//float aspectRatio = float(_resX) / float(_resY);
-	//float vcells = visionLineLength / renderInfo.aspectRatio; // how many cells fit view vertically when viewed from distance of 1
-	//float dist1Height = float(renderInfo.renderResolutionY) * vcells; // height of a wall in pixels when viewed from distance of 1.
-	
+	// We can use this to know the height of a cell in pixels from any distance.	
 	
     for (int x = 0; x < columns; x++)
     {
@@ -97,7 +93,6 @@ void CPURenderer::onDraw()
         float cameraDistance = getPlayer()->getDirection().dot(alongEye);
 		float medianDistance = cameraDistance;
 
-		
 		// Calculate height of a wall in pixels.
 		int wallHeight = int(float(renderInfo.cellPixelSize) / cameraDistance);
 
@@ -163,11 +158,11 @@ void CPURenderer::onDraw()
     _buffer.update();
 	_buffer.draw(0, 0, renderInfo.outputResolutionX, renderInfo.outputResolutionY);
 
-	ofDrawBitmapStringHighlight(ofToString(renderInfo.hfovCells), 40, 160);
-	ofDrawBitmapStringHighlight(ofToString(renderInfo.vfovCells), 100, 160);
-	ofDrawBitmapStringHighlight(ofToString(renderInfo.cellPixelSize), 200, 160);
-	ofDrawBitmapStringHighlight(ofToString(visionLineLength), 40, 200);
-	ofDrawBitmapStringHighlight(ofToString(visionLineStep), 100, 200);
+	//ofDrawBitmapStringHighlight(ofToString(renderInfo.hfovCells), 40, 160);
+	//ofDrawBitmapStringHighlight(ofToString(renderInfo.vfovCells), 100, 160);
+	//ofDrawBitmapStringHighlight(ofToString(renderInfo.cellPixelSize), 200, 160);
+	//ofDrawBitmapStringHighlight(ofToString(visionLineLength), 40, 200);
+	//ofDrawBitmapStringHighlight(ofToString(visionLineStep), 100, 200);
 
 	//_tex.drawSubsection(24, 0, 16, 512, 0, 0, 1, 256);
 }
