@@ -6,6 +6,7 @@
 #include "map.hpp"
 #include "player.hpp"
 #include "cpuRenderer.hpp"
+#include "hybridRenderer.hpp"
 
 class ofApp : public ofBaseApp{
 
@@ -29,7 +30,7 @@ public:
 private:
     Player _player;
     Map _map;
-    CPURenderer _renderer;
+    HybridRenderer _renderer;
     
 	bool _debugDrawing;
 	float _moveSpeed;
