@@ -57,96 +57,88 @@ void HybridRenderer::onDraw()
 	// Note that vision line length says how many cells fit into view horizontally.
 	// We can use this to know the height of a cell in pixels from any distance.	
 	
-    for (int x = 0; x < columns; x++)
-    {
+	for (int x = 0; x < columns; x++)
+	{
 		ofVec2f eye = eyeStart + (visionLineNorm * float(x) * visionLineStep);
 		if (debugDrawing) { debugFOVPoints.push_back(eye); }
 		eye.normalize();
-		ofVec2f normal(0, 0);
 
-		// call raycast here
-		RayHit hit;
-
-		if (!raycaster.raycast(getPlayer()->getPosition(), eye, hit))
-		{
-			continue;
-		}
-
-        float distanceToSurface = hit.distance;
-        float sampleX = hit.texU;
-		normal = hit.normal;
-		char mapElement = hit.mapElement;
-
-        // To calculate line length can't use the distance to surface directly.
-        ofVec2f alongEye(eye * distanceToSurface);
-
-		// Store ray for debug drawing for later.
-		if (debugDrawing) { debugRays.push_back(alongEye); }
-
-        float cameraDistance = getPlayer()->getDirection().dot(alongEye);
-		float medianDistance = cameraDistance;
-
-		// Calculate height of a wall in pixels.
-		// This value can be way bigger than screen Y resolution.
-		int wallHeight = int(float(renderInfo.cellPixelSize) / cameraDistance);
-		int screenWallHeight = min(wallHeight, renderInfo.renderResolutionY);
-
-		// minY is where we should start drawing wall from vertically in pixels
-		// it's unclipped here so it'll be negative when we're very close to the wall
-		// maxY is where we should stop drawing wall at vertically in pixels
-		// again, unclipped so will be large number, out of the bounds of the screen
-		int minY = (renderInfo.renderResolutionY - wallHeight) / 2;
-        int maxY = renderInfo.renderResolutionY - minY;
-
-		float texelSize = 1024.0f / wallHeight;
-		float sampleY, sampleYHeight;
-
-		if (wallHeight > renderInfo.renderResolutionY)
-		{
-			// we need to crop the texture
-			float offset = float(wallHeight - renderInfo.renderResolutionY) / 2.0 * texelSize;
-			sampleY = int(offset);
-			sampleYHeight = 1024 - int(float(wallHeight - renderInfo.renderResolutionY) * texelSize);
-		}
-		else
-		{
-			// entire texture fits on screen.
-			sampleY = 0;
-			sampleYHeight = 1024;
-		}
-        
-        sampleX = sampleX * 1023.0f;
-        if (sampleX > 1023.0f)
-        {
-            sampleX = 1023.0f;
-        }
-        
-		// Light intensity is currently just doing dot product between
-		// intersection wall normal and light direction.
-		float lightIntensity = 1.0f - ((lightInfo.direction.dot(normal) + 1.0f) / 2.0f);
-
-		// Remap light intensity to 0.25-1.0 range.
-        lightIntensity *= 1.0f;
-        lightIntensity += 0.5f;
-
-		// these are used for drawing but we still need to preserve
-		// unclamped min and max Y for texture sampling.
-		//float drawMaxY = min(maxY, renderInfo.renderResolutionY);
-		float drawMinY = max(minY, 0);
-
-		ofImage* tex;
-            
-        if ('#' == mapElement)
-        {
-			tex = &_tex;
-        }
-        else if ('$' == mapElement)
-        {
-			tex = &_texMetal;
-        }
-	
-		tex->drawSubsection(float(x) * renderInfo.resolutionMultiplier, drawMinY * renderInfo.resolutionMultiplier, renderInfo.resolutionMultiplier, screenWallHeight * renderInfo.resolutionMultiplier, 
-							sampleX, sampleY, 1, sampleYHeight);
-		
-    }
+		_drawLevelColumn(eye, x, 1);
+		_drawLevelColumn(eye, x, 0);
+	}
 }
+
+void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
+{
+	// call raycast here
+	RayHit hit;
+
+	if (!raycaster.raycast(getPlayer()->getPosition(), eye, level, hit))
+	{
+		return;
+	}
+
+	float distanceToSurface = hit.distance;
+	float sampleX = hit.texU;
+	ofVec2f normal(0, 0);
+	normal = hit.normal;
+	char mapElement = hit.mapElement;
+
+	// To calculate line length can't use the distance to surface directly.
+	ofVec2f alongEye(eye * distanceToSurface);
+
+	// Store ray for debug drawing for later.
+	if (debugDrawing) { debugRays.push_back(alongEye); }
+
+	float cameraDistance = getPlayer()->getDirection().dot(alongEye);
+	float medianDistance = cameraDistance;
+
+	// Calculate height of a wall in pixels.
+	// This value can be way bigger than screen Y resolution.
+	int wallHeight = int(float(renderInfo.cellPixelSize) / cameraDistance);
+
+	// minY is where we should start drawing wall from vertically in pixels
+	// it's unclipped here so it'll be negative when we're very close to the wall
+	// maxY is where we should stop drawing wall at vertically in pixels
+	// again, unclipped so will be large number, out of the bounds of the screen
+	int minY = (renderInfo.renderResolutionY - wallHeight) / 2;
+	int maxY = renderInfo.renderResolutionY - minY;
+
+	// Need to offset minY maxY based on level that we are drawing
+	minY -= wallHeight * level;
+	maxY -= wallHeight * level;
+
+	// Skip drawing columns that are completely off screen.
+	if (minY < 0 && maxY < 0) { return; }
+
+	float texelSize = 1024.0f / wallHeight;
+
+	sampleX = sampleX * 1023.0f;
+	if (sampleX > 1023.0f)
+	{
+		sampleX = 1023.0f;
+	}
+
+	// Light intensity is currently just doing dot product between
+	// intersection wall normal and light direction.
+	float lightIntensity = 1.0f - ((lightInfo.direction.dot(normal) + 1.0f) / 2.0f);
+
+	// Remap light intensity to 0.25-1.0 range.
+	lightIntensity *= 1.0f;
+	lightIntensity += 0.5f;
+
+	ofImage* tex;
+
+	if ('#' == mapElement)
+	{
+		tex = &_tex;
+	}
+	else if ('$' == mapElement)
+	{
+		tex = &_texMetal;
+	}
+
+	tex->drawSubsection(float(column) * renderInfo.resolutionMultiplier, minY * renderInfo.resolutionMultiplier, renderInfo.resolutionMultiplier, wallHeight * renderInfo.resolutionMultiplier,
+		sampleX, 0, 1, 1024);
+}
+

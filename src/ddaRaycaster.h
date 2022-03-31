@@ -20,7 +20,7 @@ class DDARaycaster
 public:
 	DDARaycaster();
 
-	bool raycast(const ofVec2f rayOrigin, const ofVec2f rayDirection, RayHit& hit);
+	bool raycast(const ofVec2f rayOrigin, const ofVec2f rayDirection, int mapLevel, RayHit& hit);
 	void setMap(Map& map);
 	void setMaxTestingDepth(int depth);
 

@@ -19,6 +19,8 @@ public:
 	void onInit() override;
 
 private:
+	void _drawLevelColumn(ofVec2f eye, int column, int level);
+
 	ofImage _tex;
 	ofImage _texMetal;
 };

@@ -1,10 +1,11 @@
 #include "map.hpp"
 
-Map::Map()
-{
-    _mapWidth = 16;
-    _mapHeight = 16;
-    
+Map::Map() :
+	_mapWidth(16),
+	_mapHeight(16),
+	_mapLevels(2)
+{    
+	// ground level
     _map = "";
     _map += "$$$$$$$$########";
     _map += "$......$.......#";
@@ -22,6 +23,24 @@ Map::Map()
     _map += "#......$$......#";
     _map += "#....#....#....#";
     _map += "################";
+
+	// first level
+	_map += "################";
+	_map += "$..............#";
+	_map += "$.........####.#";
+	_map += "$..$......#....#";
+	_map += "$$$$......#....#";
+	_map += "#.........######";
+	_map += "#..$...........#";
+	_map += "#..$..####.....#";
+	_map += "#..$...........#";
+	_map += "$$$$..$$..$$...#";
+	_map += "#..............#";
+	_map += "#....######....#";
+	_map += "#....#....#....#";
+	_map += "#......$$......#";
+	_map += "#....#....#....#";
+	_map += "################";
 }
 
 void Map::setSize(int width, int height)
@@ -40,16 +59,32 @@ int Map::getHeight()
     return _mapHeight;
 }
 
+char Map::getCell(int x, int y, int level)
+{
+	level = max(level, 0);
+	level = min(level, _mapLevels - 1);
+
+	int levelOffset = level * _mapHeight * _mapWidth;
+	int indexInMap = (y * _mapWidth) + x + levelOffset;
+	return _map.at(indexInMap);
+}
+
 char Map::getCell(int x, int y)
 {
-    int indexInMap = (y * _mapWidth) + x;
-    return _map.at(indexInMap);    
+	return getCell(x, y, 0);
+    //int indexInMap = (y * _mapWidth) + x;
+    //return _map.at(indexInMap);    
+}
+
+bool Map::isWall(int x, int y, int level)
+{
+    char cell = getCell(x, y, level); 
+    return (cell == CELL_SPACE) ? false : true;
 }
 
 bool Map::isWall(int x, int y)
 {
-    char cell = getCell(x, y); 
-    return (cell == CELL_SPACE) ? false : true;
+	return isWall(x, y, 0);
 }
 
 /*

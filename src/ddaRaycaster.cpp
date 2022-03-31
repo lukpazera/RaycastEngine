@@ -7,7 +7,7 @@ DDARaycaster::DDARaycaster() :
 
 }
 
-bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, RayHit& hit)
+bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, int mapLevel, RayHit& hit)
 {
 	if (_map == NULL) { return false; }
 
@@ -78,8 +78,8 @@ bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, RayHit
 			hDirection = false;
 		}
 
-		mapElement = _map->getCell(rayMapX, rayMapY);
-		if (_map->isWall(rayMapX, rayMapY))
+		mapElement = _map->getCell(rayMapX, rayMapY, mapLevel);
+		if (_map->isWall(rayMapX, rayMapY, mapLevel))
 		{
 			wallFound = true;
 		}

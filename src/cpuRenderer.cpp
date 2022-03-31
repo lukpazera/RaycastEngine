@@ -74,7 +74,7 @@ void CPURenderer::onDraw()
 		// call raycast here
 		RayHit hit;
 
-		if (!raycaster.raycast(getPlayer()->getPosition(), eye, hit))
+		if (!raycaster.raycast(getPlayer()->getPosition(), eye, 0, hit))
 		{
 			continue;
 		}
