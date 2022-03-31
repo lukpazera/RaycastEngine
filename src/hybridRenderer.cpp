@@ -8,7 +8,7 @@ void HybridRenderer::onInit()
 	_texMetal.setUseTexture(true);
 	_texMetal.load("TexMetal1024.png");
 	_texMetal.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
-
+	skyColor = ofColor(240, 140, 100);
 }
 
 void HybridRenderer::update()
@@ -22,8 +22,8 @@ void HybridRenderer::onDraw()
     ofColor groundClose(88, 96, 104);
     ofColor groundFar(16, 16, 16);
     ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
-	ofColor sky(130, 150, 165);
-	ofSetColor(sky);
+	//ofColor sky(130, 150, 165);
+	ofSetColor(skyColor);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
     
     int columns = renderInfo.renderResolutionX;

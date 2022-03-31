@@ -12,12 +12,13 @@
 
 class HybridRenderer : public Renderer
 {
+	//using Renderer::Renderer; // this should allow for the parent base renderer class to be called.
 public:
     void update() override;
 	void onDraw() override;
 	void onInit() override;
 
 private:
-    ofImage _tex;
-    ofImage _texMetal;
+	ofImage _tex;
+	ofImage _texMetal;
 };

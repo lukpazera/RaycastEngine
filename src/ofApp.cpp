@@ -10,12 +10,7 @@ void ofApp::setup(){
 	_moveRight = false;
 	_mouseWrapped = false;
 
-    _player.setMap(&_map);
-    
-	_renderer.onInit();
-    _renderer.setMap(&_map);
-    _renderer.setPlayer(&_player);
-	_renderer.setResolution(ofGetWidth(), ofGetHeight());
+	_game.setup();
 }
 
 //--------------------------------------------------------------
@@ -23,45 +18,28 @@ void ofApp::update()
 {
 	if (_moveRight)
 	{
-		_player.sideStep(_moveSpeed * 0.5 * ofGetLastFrameTime());
+		_game.getPlayer()->sideStep(_moveSpeed * 0.5 * ofGetLastFrameTime());
 	}
     if (_moveLeft)
 	{
-		_player.sideStep(-_moveSpeed * 0.5 * ofGetLastFrameTime());
+		_game.getPlayer()->sideStep(-_moveSpeed * 0.5 * ofGetLastFrameTime());
 	}
 	if (_moveForward)
 	{
-		_player.move(_moveSpeed * ofGetLastFrameTime());
+		_game.getPlayer()->move(_moveSpeed * ofGetLastFrameTime());
 	}
 	if (_moveBackward)
 	{
-		_player.move(-_moveSpeed * ofGetLastFrameTime());
+		_game.getPlayer()->move(-_moveSpeed * ofGetLastFrameTime());
 	}
 
-    _renderer.update();
+	_game.update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw()
 {    
-    _renderer.draw();
-    
-	if (_debugDrawing)
-	{
-		_map.draw();
-		_player.draw();
-	}
-
-	int fpsval = int(ofGetFrameRate());
-	std::string fps = ofToString(fpsval);
-	ofDrawBitmapStringHighlight(fps, 40, 40);
-	ofDrawBitmapStringHighlight(ofToString(ofGetLastFrameTime()), 40, 120);
-
-	if (_debugDrawing)
-	{
-		ofSetColor(40, 255, 40);
-		ofDrawRectangle(20, 70, 4 * fpsval, 20);
-	}
+	_game.draw();
 }
 
 //--------------------------------------------------------------
@@ -86,18 +64,18 @@ void ofApp::keyPressed(int key){
     // Increase/descrease resolution
     else if (key == ',')
     {
-        _renderer.decreaseResolution();
+        _game.getRenderer()->decreaseResolution();
     }
     else if (key == '.')
     {
-        _renderer.increaseResolution();
+        _game.getRenderer()->increaseResolution();
     }
 
 	// Toggle debug drawing
 	else if (key == '1')
 	{
 		_debugDrawing = !_debugDrawing;
-		_renderer.debugDrawing = _debugDrawing;
+		_game.debugDrawing = _debugDrawing;
 	}
 }
 
@@ -138,7 +116,7 @@ void ofApp::mouseMoved(int x, int y ){
 	int offsetX = x - prevx;
 	if (offsetX != 0)
 	{
-		_player.rotate(float(offsetX) * -0.01);
+		_game.getPlayer()->rotate(float(offsetX) * -0.01);
 	}
 
 // Windows specific code for handling mouse wrapping

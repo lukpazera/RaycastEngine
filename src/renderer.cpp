@@ -1,10 +1,11 @@
 #include "renderer.hpp"
 
 Renderer::Renderer() :
-    _map(NULL),
+	_map(NULL),
 	_player(NULL),
 	debugDrawing(false),
-	_maxTestingDepth(16.0f)
+	_maxTestingDepth(16.0f),
+	skyColor(ofColor(0, 40, 255))
 {
 	setLightAngle(3.14159 / 3.0);
     
@@ -13,6 +14,7 @@ Renderer::Renderer() :
 	debugRays.clear();
 	debugFOVPoints.clear();
 
+	skyColor = ofColor(255, 40, 0);
 	onInit();
 }
 

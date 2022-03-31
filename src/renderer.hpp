@@ -49,7 +49,7 @@ public:
 
 	virtual void update() {};
 	virtual void onDraw() {};
-	virtual void onInit() {};
+	virtual void onInit() { skyColor = ofColor(240, 200, 0); }
 	virtual void onResolutionChanged() {};
 
 	void draw();
@@ -69,6 +69,7 @@ public:
 	DDARaycaster raycaster;
 	RenderInfo renderInfo; // read only, do not change this directly!
 	LightInfo lightInfo;
+	ofColor skyColor;
 
 	bool debugDrawing;
 	vector<ofVec2f> debugRays;
@@ -82,13 +83,4 @@ private:
 	Player* _player;
 
     float _maxTestingDepth;
-    //float _lightAngle;
-	//float _lightIntensity;
-    //ofVec2f _lightDirection;
-
-	// Note that vision line length says how many cells fit into view horizontally.
-	// We can use this to know the height of a cell in pixels from any distance.
-	//float aspectRatio = float(_resX) / float(_resY);
-	//float vcells = visionLineLength / aspectRatio; // how many cells fit view vertically when viewed from distance of 1
-	//float dist1Height = float(_resY) * vcells; // height of a wall in pixels when viewed from distance of 1.
 };

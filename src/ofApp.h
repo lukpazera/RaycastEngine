@@ -3,6 +3,7 @@
 #include <string>
 #include "ofMain.h"
 #include "ofVec2f.h"
+#include "game.hpp"
 #include "map.hpp"
 #include "player.hpp"
 #include "cpuRenderer.hpp"
@@ -28,9 +29,7 @@ public:
     void gotMessage(ofMessage msg);
     
 private:
-    Player _player;
-    Map _map;
-    HybridRenderer _renderer;
+	Game _game;
     
 	bool _debugDrawing;
 	float _moveSpeed;
