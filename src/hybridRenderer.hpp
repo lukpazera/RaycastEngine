@@ -8,6 +8,7 @@
 #include "texture.hpp"
 #include "renderer.hpp"
 #include "ddaRaycaster.h"
+#include "fog.hpp"
 
 
 class HybridRenderer : public Renderer
@@ -23,4 +24,6 @@ private:
 
 	ofImage _tex;
 	ofImage _texMetal;
+
+	Fog _fog;
 };

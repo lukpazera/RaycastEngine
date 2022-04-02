@@ -9,6 +9,7 @@ void HybridRenderer::onInit()
 	_texMetal.load("TexMetal1024.png");
 	_texMetal.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 	skyColor = ofColor(240, 140, 100);
+	_fog.setColor(ofColor(48, 48, 48));
 }
 
 void HybridRenderer::update()
@@ -20,7 +21,7 @@ void HybridRenderer::onDraw()
 {
 	// Background
     ofColor groundClose(88, 96, 104);
-    ofColor groundFar(16, 16, 16);
+    ofColor groundFar(48, 48, 48);
     ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
 	//ofColor sky(130, 150, 165);
 	ofSetColor(skyColor);
@@ -138,7 +139,12 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 		tex = &_texMetal;
 	}
 
-	tex->drawSubsection(float(column) * renderInfo.resolutionMultiplier, minY * renderInfo.resolutionMultiplier, renderInfo.resolutionMultiplier, wallHeight * renderInfo.resolutionMultiplier,
-		sampleX, 0, 1, 1024);
+	float x = float(column) * renderInfo.resolutionMultiplier;
+	float y = minY * renderInfo.resolutionMultiplier;
+	float width = float(renderInfo.resolutionMultiplier);
+	float height = float(wallHeight * renderInfo.resolutionMultiplier);
+	tex->drawSubsection(x, y, width, height, sampleX, 0, 1, 1024);
+
+	_fog.applyToColumn(x, y, width, height, cameraDistance);
 }
 
