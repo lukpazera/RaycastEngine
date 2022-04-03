@@ -14,11 +14,11 @@ void HybridRenderer::onInit()
 	_fog.setColor(ofColor(48, 48, 48));
 
 	_sky.setUseTexture(true);
-	_sky.load("TexConcrete1024.png");
+	_sky.load("Sky.png");
 	_sky.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 	_sky.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 
-	_skyImageAngleRange = PI / 2.0f; // 90 degrees range
+	_skyImageAngleRange = PI / 2.0f; // / 2.0f; // 180 degrees range
 }
 
 void HybridRenderer::update()
@@ -33,9 +33,10 @@ void HybridRenderer::onDraw()
     ofColor groundFar(48, 48, 48);
     ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
 	//ofColor sky(130, 150, 165);
-	ofSetColor(skyColor);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
+	//ofSetColor(skyColor);
+	//ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
     
+	ofSetColor(255, 225, 190);
 	_drawSky();
 
     int columns = renderInfo.renderResolutionX;
@@ -164,20 +165,25 @@ void HybridRenderer::_drawSky()
 	float playerAngle = TWO_PI - getPlayer()->getLookAtAngle(); // Need to reverse the angle, the sky will scroll in reverse direction otherwise
 	float fov = renderInfo.fov;
 
+	//float skySampleXOffset = fmod(playerAngle, _skyImageAngleRange);
 	float skySampleXOffset = fmod(playerAngle / _skyImageAngleRange, 1.0f); // offset into the sky texture in 0-1 range.
 	float skySampleWidth = 1.0f - skySampleXOffset; // how much of a texture we need to copy horizontally
-	float skySampleX = skySampleXOffset * 1024.0f; // offset into the sky texture in pixels.
+	float skySampleX = skySampleXOffset * 4096.0f; // offset into the sky texture in pixels.
 
 	float width = renderInfo.renderResolutionX * renderInfo.resolutionMultiplier;
-	float height = renderInfo.renderResolutionY * renderInfo.resolutionMultiplier * 0.5f;
+	float height = renderInfo.renderResolutionY * renderInfo.resolutionMultiplier;
+	float targetHeight = height * 0.5f;
 
-	float sourceWidth = fov / _skyImageAngleRange * 1024.0f * skySampleWidth; // how many pixels to get from sky texture horizontally
-	float sourceHeight = fov / _skyImageAngleRange * 1024.0f * 0.5f; // how many pixels to get from sky texture vertically
-	float targetWidth = sourceWidth * (width / 1024.0f);
+	float textureHPixelsPerFOV = fov / _skyImageAngleRange * 4096.0f; // how many texture pixels fit the screen horizontally
+	float textureVPixelsPerFOV = textureHPixelsPerFOV * 0.5f; // because of 2:1 texture aspect ratio
 
-	//_sky.drawSubsection(0, 0, width, height, skySampleX, 0, sourceWidth, sourceWidth * 0.5f);
-	_sky.drawSubsection(0, 0, targetWidth, sourceHeight, skySampleX, 0, sourceWidth, sourceHeight);
-	_sky.drawSubsection(targetWidth, 0, width - targetWidth, sourceHeight, 0, 0, 1024.0f - sourceWidth, sourceHeight);
+	float sourceWidth = textureHPixelsPerFOV * skySampleWidth; // how many pixels to get from sky texture horizontally
+	float sourceHeight = textureVPixelsPerFOV * 0.5f; // how many pixels to get from sky texture vertically
+	
+	float targetWidth = sourceWidth * (width / 4096.0f);
+
+	_sky.drawSubsection(0, 0, targetWidth, targetHeight, skySampleX, 256, sourceWidth, sourceHeight);
+	_sky.drawSubsection(targetWidth, 0, width - targetWidth, targetHeight, 0, 256, 4096.0f - sourceWidth, sourceHeight);
 
 	std::string offsetX = ofToString(skySampleX);
 	ofDrawBitmapStringHighlight(offsetX, 40, 80);
