@@ -11,7 +11,7 @@ void HybridRenderer::onInit()
 	_texMetal.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 
 	skyColor = ofColor(240, 140, 100);
-	_fog.setColor(ofColor(48, 48, 48));
+	_fog.setColor(ofColor(32, 32, 32));
 
 	_sky.setUseTexture(true);
 	_sky.load("Sky.png");
@@ -36,7 +36,7 @@ void HybridRenderer::onDraw()
 	//ofSetColor(skyColor);
 	//ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
     
-	ofSetColor(255, 225, 190);
+	ofSetColor(255, 255, 255);
 	_drawSky();
 
     int columns = renderInfo.renderResolutionX;
