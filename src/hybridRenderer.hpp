@@ -21,9 +21,12 @@ public:
 
 private:
 	void _drawLevelColumn(ofVec2f eye, int column, int level);
+	void _drawSky();
 
 	ofImage _tex;
 	ofImage _texMetal;
+	ofImage _sky;
+	float _skyImageAngleRange;
 
 	Fog _fog;
 };
