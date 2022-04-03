@@ -78,7 +78,6 @@ bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, int ma
 			hDirection = false;
 		}
 
-		mapElement = _map->getCell(rayMapX, rayMapY, mapLevel);
 		if (_map->isWall(rayMapX, rayMapY, mapLevel))
 		{
 			wallFound = true;
@@ -86,6 +85,8 @@ bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, int ma
 	}
 	
 	if (!wallFound) { return false; }
+
+	mapElement = _map->getCell(rayMapX, rayMapY, mapLevel);
 
 	ofVec2f intersection = ofVec2f();
 	intersection = rayOrigin + rayDir * castDistance;
