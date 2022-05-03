@@ -1,10 +1,10 @@
 #include "fog.hpp"
 
 Fog::Fog() :
-	_minDistance(6.0),
-	_maxDistance(16.0)
+	_minDistance(1.0),
+	_maxDistance(14.0)
 {    
-	_initTexture(ofColor(64, 64, 64));
+	_initTexture(ofColor(32, 32, 32));
 }
 
 void Fog::setColor(ofColor color)
