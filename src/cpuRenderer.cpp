@@ -82,7 +82,7 @@ void CPURenderer::onDraw()
         float distanceToSurface = hit.distance;
         float sampleX = hit.texU;
 		normal = hit.normal;
-		char mapElement = hit.mapElement;
+		MapCell mapElement = hit.mapElement;
 
         // To calculate line length can't use the distance to surface directly.
         ofVec2f alongEye(eye * distanceToSurface);
@@ -132,12 +132,12 @@ void CPURenderer::onDraw()
                 sampleY = 1023.0f;
             }
             
-            if ('#' == mapElement)
+            if ('#' == mapElement.ident)
             {
 				pixelColor = _tex.getColor((int)sampleX, (int)sampleY);
                 //pixelColor = ofColor(255, 230, 150);
             }
-            else if ('$' == mapElement)
+            else if ('$' == mapElement.ident)
             {
 				pixelColor = _texMetal.getColor((int)sampleX, (int)sampleY);
                 //pixelColor = ofColor(200, 230, 250);

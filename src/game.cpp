@@ -19,6 +19,11 @@ HybridRenderer* Game::getRenderer()
 	return &_renderer;
 }
 
+TextureManager* Game::getTextureManager()
+{
+	return &_texManager;
+}
+
 void Game::setup()
 {
     _player.setMap(&_map);

@@ -55,7 +55,7 @@ bool DDARaycaster::raycast(const ofVec2f rayOrigin, const ofVec2f rayDir, int ma
 
 	bool wallFound = false;
 	float castDistance = 0;
-	char mapElement;
+	MapCell mapElement;
 	float texU = 0;
 	while (!wallFound && castDistance < _maxTestingDepth)
 	{

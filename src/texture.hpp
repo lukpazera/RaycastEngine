@@ -1,11 +1,7 @@
 #pragma once
 
 /*
- * CPU texture.
- * Since all rendering is done on CPU there is no need for
- * ofImage and using ofTexture (which is GPU one).
- *
- *
+ * Texture
  */
 
 #include <vector>
@@ -16,13 +12,11 @@
 class Texture
 {
 public:
-    Texture(ofImage& image);
-    Texture(std::string filename);
+    Texture(std::string ident, ofImage& image);
+    Texture(std::string ident, std::string filename);
     
+	std::string getIdent();
 private:
-    /*
-     * Texture map
-     */
-    std::vector<char> _texture;
-    ofPixels _pixels;
+	std::string _ident;
+	ofImage _texImage;
 };

@@ -6,13 +6,13 @@
 
 struct RayHit
 {
-	RayHit() : distance(0), intersection(ofVec2f()), normal(ofVec2f()), texU(0), mapElement(' ') {}
+	RayHit() : distance(0), intersection(ofVec2f()), normal(ofVec2f()), texU(0), mapElement() {}
 
 	float distance;
 	ofVec2f intersection;
 	ofVec2f normal;
 	float texU;
-	char mapElement;
+	MapCell mapElement;
 };
 
 class DDARaycaster

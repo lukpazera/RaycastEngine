@@ -7,6 +7,7 @@
 #include "player.hpp"
 #include "cpuRenderer.hpp"
 #include "hybridRenderer.hpp"
+#include "textureManager.hpp"
 
 class Game
 {
@@ -19,11 +20,13 @@ public:
 
 	Player* getPlayer();
 	HybridRenderer* getRenderer();
+	TextureManager* getTextureManager();
 	bool debugDrawing;
 
 private:
     Player _player;
     Map _map;
 	HybridRenderer _renderer;
+	TextureManager _texManager;
 
 };

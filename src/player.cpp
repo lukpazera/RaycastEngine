@@ -34,7 +34,7 @@ float Player::getLookAtAngle() const
 void Player::move(float distance)
 {    
     ofVec2f newPosition = _playerPosition + (_playerDirection * distance);
-    if (_map->isWall((int)newPosition.x, (int)newPosition.y))
+    if (_map->getCell((int)newPosition.x, (int)newPosition.y) .isWall()) //isWall((int)newPosition.x, (int)newPosition.y))
     {
         return;
     }
@@ -58,7 +58,7 @@ void Player::sideStep(float distance)
 	moveDirection.x = sinf(moveAngle);
 	moveDirection.y = cosf(moveAngle);
 	ofVec2f newPosition = _playerPosition + (moveDirection * abs(distance));
-	if (_map->isWall((int)newPosition.x, (int)newPosition.y))
+	if (_map->getCell((int)newPosition.x, (int)newPosition.y) .isWall())
 	{
 		return;
 	}

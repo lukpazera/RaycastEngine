@@ -95,7 +95,7 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 	float sampleX = hit.texU;
 	ofVec2f normal(0, 0);
 	normal = hit.normal;
-	char mapElement = hit.mapElement;
+	MapCell mapElement = hit.mapElement;
 
 	// To calculate line length can't use the distance to surface directly.
 	ofVec2f alongEye(eye * distanceToSurface);
@@ -142,11 +142,11 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 
 	ofImage* tex;
 
-	if ('#' == mapElement)
+	if ('#' == mapElement.ident)
 	{
 		tex = &_tex;
 	}
-	else if ('$' == mapElement)
+	else if ('$' == mapElement.ident)
 	{
 		tex = &_texMetal;
 	}
