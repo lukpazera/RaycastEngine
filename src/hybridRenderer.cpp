@@ -11,7 +11,7 @@ void HybridRenderer::onInit()
 	_texMetal.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 
 	skyColor = ofColor(240, 140, 100);
-	_fog.setColor(ofColor(8, 8, 8));
+	_fog.setColor(ofColor(48, 48, 48));
 
 	_sky.setUseTexture(true);
 	_sky.load("Sky.png");
@@ -29,7 +29,7 @@ void HybridRenderer::update()
 void HybridRenderer::onDraw()
 {
 	// Background
-    ofColor groundClose(80, 88, 96);
+    ofColor groundClose(88, 88, 96);
     ofColor groundFar(40, 40, 40);
     ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
 	//ofColor sky(130, 150, 165);
