@@ -24,6 +24,8 @@ private:
 	void _drawSky();
 
 	ofImage _tex;
+	ofImage _texTop;
+	ofImage _texLow;
 	ofImage _texMetal;
 	ofImage _sky;
 	float _skyImageAngleRange;

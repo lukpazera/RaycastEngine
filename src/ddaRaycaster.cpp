@@ -2,7 +2,7 @@
 
 DDARaycaster::DDARaycaster() :
 	_map(NULL),
-	_maxTestingDepth(16)
+	_maxTestingDepth(24)
 {
 
 }

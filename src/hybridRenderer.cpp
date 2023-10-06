@@ -6,19 +6,27 @@ void HybridRenderer::onInit()
 	_tex.load("TexConcrete1024.png");
 	_tex.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 
+	_texTop.setUseTexture(true);
+	_texTop.load("TexConcreteTop1024.png");
+	_texTop.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
+
+	_texLow.setUseTexture(true);
+	_texLow.load("TexConcreteLow1024.png");
+	_texLow.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
+
 	_texMetal.setUseTexture(true);
 	_texMetal.load("TexConcrete2_1024.png");
 	_texMetal.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 
 	skyColor = ofColor(240, 140, 100);
-	_fog.setColor(ofColor(8, 8, 8));
+	_fog.setColor(ofColor(04, 8, 12)); // 18, 23));
 
 	_sky.setUseTexture(true);
 	_sky.load("Sky.png");
 	_sky.getTexture().setTextureMinMagFilter(GL_LINEAR, GL_NEAREST);
 	_sky.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 
-	_skyImageAngleRange = PI / 2.0f; // / 2.0f; // 180 degrees range
+	_skyImageAngleRange = 2.0f * PI; // / 1.0f; // / 2.0f; // 180 degrees range
 }
 
 void HybridRenderer::update()
@@ -29,8 +37,8 @@ void HybridRenderer::update()
 void HybridRenderer::onDraw()
 {
 	// Background
-    ofColor groundClose(80, 88, 96);
-    ofColor groundFar(40, 40, 40);
+    ofColor groundClose(46, 50, 55);
+    ofColor groundFar(25, 33, 36);
     ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
 	//ofColor sky(130, 150, 165);
 	//ofSetColor(skyColor);
@@ -76,6 +84,7 @@ void HybridRenderer::onDraw()
 		if (debugDrawing) { debugFOVPoints.push_back(eye); }
 		eye.normalize();
 
+		_drawLevelColumn(eye, x, 2);
 		_drawLevelColumn(eye, x, 1);
 		_drawLevelColumn(eye, x, 0);
 	}
@@ -137,7 +146,7 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 	float lightIntensity = 1.0f - ((lightInfo.direction.dot(normal) + 1.0f) / 2.0f);
 
 	// Remap light intensity to 0.25-1.0 range.
-	lightIntensity *= 1.0f;
+	lightIntensity *= 0.5f;
 	lightIntensity += 0.5f;
 
 	ofImage* tex;
@@ -145,6 +154,14 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 	if ('#' == mapElement)
 	{
 		tex = &_tex;
+	}
+	else if ('^' == mapElement)
+	{
+		tex = &_texTop;
+	}
+	else if ('&' == mapElement)
+	{
+		tex = &_texLow;
 	}
 	else if ('$' == mapElement)
 	{
@@ -162,29 +179,65 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 
 void HybridRenderer::_drawSky()
 {
+	float skyboxImageRadiansRange = PI;  // skybox image covers 180 degrees
+	float skyboxPixelWidth = 8192.0f;
+	float fov = PI / 2.f;
+
 	float playerAngle = TWO_PI - getPlayer()->getLookAtAngle(); // Need to reverse the angle, the sky will scroll in reverse direction otherwise
-	float fov = renderInfo.fov;
 
-	//float skySampleXOffset = fmod(playerAngle, _skyImageAngleRange);
-	float skySampleXOffset = fmod(playerAngle / _skyImageAngleRange, 1.0f); // offset into the sky texture in 0-1 range.
-	float skySampleWidth = 1.0f - skySampleXOffset; // how much of a texture we need to copy horizontally
-	float skySampleX = skySampleXOffset * 4096.0f; // offset into the sky texture in pixels.
+	// BG BLOCK 1
+	float skySampleXOffset = fmod(playerAngle / skyboxImageRadiansRange, 1.0f); // offset into the sky texture in 0-1 range. One image covers 180 degrees (PI radians).
 
+	float skyPixelDensity = 8192.0f / skyboxImageRadiansRange; 	
+	
+	float skySampleX = skySampleXOffset * 8192.0f; // offset into the sky texture in pixels.
+
+	// width and height is the actual screen resolution.
 	float width = renderInfo.renderResolutionX * renderInfo.resolutionMultiplier;
 	float height = renderInfo.renderResolutionY * renderInfo.resolutionMultiplier;
 	float targetHeight = height * 0.5f;
 
-	float textureHPixelsPerFOV = fov / _skyImageAngleRange * 4096.0f; // how many texture pixels fit the screen horizontally
-	float textureVPixelsPerFOV = textureHPixelsPerFOV * 0.5f; // because of 2:1 texture aspect ratio
-
-	float sourceWidth = textureHPixelsPerFOV * skySampleWidth; // how many pixels to get from sky texture horizontally
-	float sourceHeight = textureVPixelsPerFOV * 0.5f; // how many pixels to get from sky texture vertically
+	float sourceWidth = skyPixelDensity * fov;
+	float sourceHeight = sourceWidth * 0.25f;
 	
-	float targetWidth = sourceWidth * (width / 4096.0f);
+	float targetWidth = width;
 
+	// 256 here is a fixed offset in Y into the image. I could just as well cut these 256 pixels from the image and then use offset 0.
 	_sky.drawSubsection(0, 0, targetWidth, targetHeight, skySampleX, 256, sourceWidth, sourceHeight);
-	_sky.drawSubsection(targetWidth, 0, width - targetWidth, targetHeight, 0, 256, 4096.0f - sourceWidth, sourceHeight);
 
-	std::string offsetX = ofToString(skySampleX);
+	// BG BLOCK2
+	float skySampleXEndOffset = skySampleX + sourceWidth; // one screen is 90 degrees, we put half of the image 
+	if (skySampleXOffset > 0.5f) // Basically one sky image covers PI radians and FOV we assume is PI/2 (so we see half of skybox image on screen at the same time.)
+	{
+		float block1PieceOnScreen = 1.0f - skySampleXOffset; // this tells how much of skybox image1 is visible on screen, in range 0-1.0.
+		float block2Offset = (block1PieceOnScreen * skyboxImageRadiansRange) / fov; // Calculate the offset as 0-1 range value in screen space. Basically this will be the offset to draw 2nd block at in 0-1 screen range.
+		float targetX = block2Offset * width; // and get final value in pixels.
+
+		_sky.drawSubsection(targetX, 0, targetWidth, targetHeight, 0, 256, sourceWidth, sourceHeight);
+
+		/*
+		std::string skyEndOffsetString = "Block1 % in FOV: " + ofToString(block1PieceOnScreen);
+		ofDrawBitmapStringHighlight(skyEndOffsetString, 160, 170);
+
+		std::string block2OffsetDisp = "Block 2 offset: " + ofToString(block2Offset);
+		ofDrawBitmapStringHighlight(block2OffsetDisp, 160, 190);
+		*/
+	}
+
+	/*
+	std::string offsetX = "Sky Sample X: " + ofToString(skySampleX);
 	ofDrawBitmapStringHighlight(offsetX, 40, 80);
+
+	std::string sourceWidthString = ofToString(sourceWidth);
+	ofDrawBitmapStringHighlight(sourceWidthString, 40, 110);
+
+	std::string sourceHeightString = ofToString(sourceHeight);
+	ofDrawBitmapStringHighlight(sourceHeightString, 160, 110);
+
+	std::string targetWidthString = ofToString(targetWidth);
+	ofDrawBitmapStringHighlight(targetWidthString, 40, 140);
+
+	std::string targetHeightString = ofToString(targetHeight);
+	ofDrawBitmapStringHighlight(targetHeightString, 160, 140);
+	*/
 }
