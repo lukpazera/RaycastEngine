@@ -179,8 +179,8 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 
 void HybridRenderer::_drawSky()
 {
-	float skyboxImageRadiansRange = PI;  // skybox image covers 180 degrees
-	float skyboxPixelWidth = 8192.0f;
+	float skyboxImageRadiansRange = TWO_PI;  // skybox image covers 180 degrees
+	float skyboxPixelWidth = 15360.0f;
 	float fov = PI / 2.f;
 
 	float playerAngle = TWO_PI - getPlayer()->getLookAtAngle(); // Need to reverse the angle, the sky will scroll in reverse direction otherwise
@@ -188,9 +188,9 @@ void HybridRenderer::_drawSky()
 	// BG BLOCK 1
 	float skySampleXOffset = fmod(playerAngle / skyboxImageRadiansRange, 1.0f); // offset into the sky texture in 0-1 range. One image covers 180 degrees (PI radians).
 
-	float skyPixelDensity = 8192.0f / skyboxImageRadiansRange; 	
+	float skyPixelDensity = skyboxPixelWidth / skyboxImageRadiansRange;
 	
-	float skySampleX = skySampleXOffset * 8192.0f; // offset into the sky texture in pixels.
+	float skySampleX = skySampleXOffset * skyboxPixelWidth; // offset into the sky texture in pixels.
 
 	// width and height is the actual screen resolution.
 	float width = renderInfo.renderResolutionX * renderInfo.resolutionMultiplier;
@@ -207,7 +207,7 @@ void HybridRenderer::_drawSky()
 
 	// BG BLOCK2
 	float skySampleXEndOffset = skySampleX + sourceWidth; // one screen is 90 degrees, we put half of the image 
-	if (skySampleXOffset > 0.5f) // Basically one sky image covers PI radians and FOV we assume is PI/2 (so we see half of skybox image on screen at the same time.)
+	if (skySampleXOffset > 0.75f) // Basically one sky image covers PI radians and FOV we assume is PI/2 (so we see half of skybox image on screen at the same time.)
 	{
 		float block1PieceOnScreen = 1.0f - skySampleXOffset; // this tells how much of skybox image1 is visible on screen, in range 0-1.0.
 		float block2Offset = (block1PieceOnScreen * skyboxImageRadiansRange) / fov; // Calculate the offset as 0-1 range value in screen space. Basically this will be the offset to draw 2nd block at in 0-1 screen range.
