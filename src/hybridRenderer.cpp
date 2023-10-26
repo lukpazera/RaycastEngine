@@ -36,13 +36,9 @@ void HybridRenderer::update()
 
 void HybridRenderer::onDraw()
 {
-	// Background
     ofColor groundClose(46, 50, 55);
     ofColor groundFar(25, 33, 36);
     ofBackgroundGradient(groundFar, groundClose, OF_GRADIENT_BAR);
-	//ofColor sky(130, 150, 165);
-	//ofSetColor(skyColor);
-	//ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight() / 2);
     
 	ofSetColor(255, 255, 255);
 	_drawSky();
@@ -151,6 +147,7 @@ void HybridRenderer::_drawLevelColumn(ofVec2f eye, int column, int level)
 
 	ofImage* tex;
 
+	// This is really brute force, hard coded textures.
 	if ('#' == mapElement)
 	{
 		tex = &_tex;

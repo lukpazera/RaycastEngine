@@ -157,14 +157,6 @@ void CPURenderer::onDraw()
     }
     _buffer.update();
 	_buffer.draw(0, 0, renderInfo.outputResolutionX, renderInfo.outputResolutionY);
-
-	//ofDrawBitmapStringHighlight(ofToString(renderInfo.hfovCells), 40, 160);
-	//ofDrawBitmapStringHighlight(ofToString(renderInfo.vfovCells), 100, 160);
-	//ofDrawBitmapStringHighlight(ofToString(renderInfo.cellPixelSize), 200, 160);
-	//ofDrawBitmapStringHighlight(ofToString(visionLineLength), 40, 200);
-	//ofDrawBitmapStringHighlight(ofToString(visionLineStep), 100, 200);
-
-	//_tex.drawSubsection(24, 0, 16, 512, 0, 0, 1, 256);
 }
 
 // -------- Private methods
